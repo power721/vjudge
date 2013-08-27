@@ -1,6 +1,8 @@
 package vjudge.config;
 
 import vjudge.action.MainController;
+import vjudge.model.DescriptionModel;
+import vjudge.model.ProblemModel;
 
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
@@ -10,6 +12,8 @@ import com.jfinal.config.Plugins;
 import com.jfinal.config.Routes;
 import com.jfinal.core.JFinal;
 import com.jfinal.ext.interceptor.SessionInViewInterceptor;
+import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.c3p0.C3p0Plugin;
 
 public class JudgeConfig extends JFinalConfig
 {
@@ -34,7 +38,18 @@ public class JudgeConfig extends JFinalConfig
 	public void configPlugin(Plugins me)
 	{
 		// TODO Auto-generated method stub
+		// 配置C3p0数据库连接池插件
+		C3p0Plugin c3p0Plugin = new C3p0Plugin(getProperty("jdbcUrl"), getProperty("user"), getProperty("password").trim());
+		me.add(c3p0Plugin);
 
+		// 配置ActiveRecord插件
+		ActiveRecordPlugin arp = new ActiveRecordPlugin(c3p0Plugin);
+		arp.setShowSql(true);
+		// arp.addMapping("user", "uid", UserModel.class); // 映射user表到 User模型
+		arp.addMapping("t_problem", "C_ID", ProblemModel.class);
+		arp.addMapping("t_description", "C_ID", DescriptionModel.class);
+		// arp.addMapping("contest", "cid", ContestModel.class);
+		me.add(arp);
 	}
 
 	@Override
@@ -50,13 +65,13 @@ public class JudgeConfig extends JFinalConfig
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Override
 	public void afterJFinalStart()
 	{
-		
+
 	}
-	
+
 	/**
 	 * @param args
 	 */
