@@ -6,7 +6,7 @@ package vjudge.bean;
  * @author Isun
  * 
  */
-public class Cproblem
+public class Cproblem extends Bean
 {
 	private int id;
 

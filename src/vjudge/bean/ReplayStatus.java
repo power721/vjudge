@@ -8,7 +8,7 @@ import java.util.Set;
  * @author Isun
  * 
  */
-public class ReplayStatus
+public class ReplayStatus extends Bean
 {
 	private int id;
 	private String data;

@@ -9,7 +9,7 @@ import java.util.Set;
  * @author Isun
  * 
  */
-public class Contest
+public class Contest extends Bean
 {
 	private int id;
 	private String title;

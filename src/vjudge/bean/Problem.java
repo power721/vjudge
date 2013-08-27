@@ -9,7 +9,7 @@ import java.util.Set;
  * @author Isun
  * 
  */
-public class Problem
+public class Problem extends Bean
 {
 	private int id; // Hibernate统编ID
 	private String title; // 标题

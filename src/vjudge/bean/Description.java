@@ -3,7 +3,7 @@ package vjudge.bean;
 import java.util.Date;
 import java.util.Set;
 
-public class Description
+public class Description extends Bean
 {
 
 	private int id; // Hibernate统编ID

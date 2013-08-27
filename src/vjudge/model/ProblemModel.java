@@ -11,16 +11,28 @@ public class ProblemModel extends BaseModel<ProblemModel>
 
 	public static final ProblemModel dao = new ProblemModel();
 
+	public ProblemModel find(Problem problem)
+	{
+		ProblemModel problemModel = (ProblemModel) dao.findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1",
+				problem.getOriginOJ(), problem.getOriginProb());
+		return problemModel;
+	}
+
 	@Override
 	public boolean addOrModify(Object bean)
 	{
 		Problem problem = (Problem) bean;
 		boolean insertFlag = false;
-		ProblemModel problemModel = (ProblemModel) dao.findById(problem.getId());
+		ProblemModel problemModel = (ProblemModel) problem.getModel();
 		if (problemModel == null)
 		{
-			problemModel = new ProblemModel();
-			insertFlag = true;
+			problemModel = find(problem);
+			if (problemModel == null)
+			{
+				problemModel = new ProblemModel();
+				problem.setModel(problemModel);
+				insertFlag = true;
+			}
 		}
 
 		problemModel.set("C_TITLE", problem.getTitle());
@@ -34,7 +46,11 @@ public class ProblemModel extends BaseModel<ProblemModel>
 		// what to do with descriptions, cproblems, submissions?
 
 		if (insertFlag)
-			return problemModel.save();
+		{
+			problemModel.save();
+			problem.setId(problemModel.getInt("C_ID"));
+			return problem.getId() != 0;
+		}
 		return problemModel.update();
 	}
 

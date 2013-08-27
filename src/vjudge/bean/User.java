@@ -8,7 +8,7 @@ import java.util.Set;
  * @author Isun
  * 
  */
-public class User
+public class User extends Bean
 {
 
 	private int id;

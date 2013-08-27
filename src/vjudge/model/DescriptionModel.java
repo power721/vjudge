@@ -8,15 +8,22 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 
 	public static final DescriptionModel dao = new DescriptionModel();
 
+	public DescriptionModel find(Description description)
+	{
+		DescriptionModel descriptionModel = (DescriptionModel) dao.find("SELECT * FROM t_description WHERE C_PROBLEM_ID=?", description.getProblem().getId());
+		return descriptionModel;
+	}
+
 	@Override
 	public boolean addOrModify(Object bean)
 	{
 		Description description = (Description) bean;
 		boolean insertFlag = false;
-		DescriptionModel descriptionModel = (DescriptionModel) dao.findById(description.getId());
+		DescriptionModel descriptionModel = (DescriptionModel) description.getModel();
 		if (descriptionModel == null)
 		{
 			descriptionModel = new DescriptionModel();
+			description.setModel(descriptionModel);
 			insertFlag = true;
 		}
 
@@ -33,7 +40,11 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 		descriptionModel.set("C_VOTE", description.getVote());
 
 		if (insertFlag)
-			return descriptionModel.save();
+		{
+			descriptionModel.save();
+			description.setId(descriptionModel.getInt("C_ID"));
+			return description.getId() != 0;
+		}
 		return descriptionModel.update();
 	}
 

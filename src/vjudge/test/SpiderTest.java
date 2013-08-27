@@ -16,9 +16,13 @@ public class SpiderTest extends BaseController
 	
 	public void poj()
 	{
+		String pid = getPara(0);
+		if(pid == null || pid.equals(""))
+			pid = "1000";
+		
 		Problem problem = new Problem();
 		problem.setOriginOJ("POJ");
-		problem.setOriginProb("1000");
+		problem.setOriginProb(pid);
 		problem.setTitle("Crawling……");
 		baseService.addOrModify(problem);
 		
@@ -38,7 +42,7 @@ public class SpiderTest extends BaseController
 		spider.setProblem(problem);
 		spider.setDescription(description);
 		spider.start();
-		renderText("Sipder crawling……");
+		renderText("Sipder crawling " + pid + "……");
 	}
 
 }

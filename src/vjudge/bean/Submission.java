@@ -8,7 +8,7 @@ import java.util.Date;
  * @author Isun
  * 
  */
-public class Submission
+public class Submission extends Bean
 {
 	private int id; // Hibernate统编ID
 	private String status; // 状态
