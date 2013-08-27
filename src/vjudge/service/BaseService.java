@@ -11,17 +11,37 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import com.jfinal.plugin.activerecord.Db;
+import vjudge.model.BaseModel;
+
 import com.jfinal.plugin.activerecord.Model;
 
 @SuppressWarnings("rawtypes")
 public class BaseService implements IBaseService {
 
 	public static BaseService baseService = new BaseService();
-	static private Model baseDao;
+	static private BaseModel baseDao;
 
-	public void addOrModify(Object entity) {
+	public void addOrModify(Object bean) {
 		//BaseService.baseDao.addOrModify(entity);
+		String beanClassName = bean.getClass().getName();
+		String modelClassName = beanClassName + "Model";
+		try
+		{
+			baseDao = (BaseModel) Class.forName(modelClassName).newInstance();
+		} catch (InstantiationException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		baseDao.addOrModify(bean);
 	}
 
 	public void delete(Object entity) {
@@ -113,7 +133,7 @@ public class BaseService implements IBaseService {
 		return baseDao;
 	}
 
-	public void setBaseDao(Model baseDao) {
+	public void setBaseDao(BaseModel baseDao) {
 		BaseService.baseDao = baseDao;
 	}
 

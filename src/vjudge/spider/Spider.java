@@ -2,8 +2,6 @@ package vjudge.spider;
 
 import vjudge.bean.Description;
 import vjudge.bean.Problem;
-import vjudge.model.DescriptionModel;
-import vjudge.model.ProblemModel;
 import vjudge.service.BaseService;
 import vjudge.service.IBaseService;
 
@@ -42,15 +40,16 @@ public abstract class Spider extends Thread implements Cloneable
 			description.setProblem(problem);
 			baseService.addOrModify(problem);
 			baseService.addOrModify(description);
-			ProblemModel.dao.addOrModify(problem);
-			DescriptionModel.dao.addOrModify(description);
+			//ProblemModel.dao.addOrModify(problem);
+			//DescriptionModel.dao.addOrModify(description);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
 			if (problem.getUrl() == null)
 			{
 				// 本次是第一次抓取，且失败，认为输入OJ题号错误，删除
-				ProblemModel.dao.delete(problem);
+				//ProblemModel.dao.delete(problem);
+				baseService.delete(problem);
 			} else
 			{
 				// 本次虽失败，但因为题目本来是好的，估计是网络问题，故不删
