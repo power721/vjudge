@@ -42,7 +42,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 	public boolean delete(Object bean)
 	{
 		Problem problem = (Problem) bean;
-		
+
 		Iterator<Description> iterator = problem.getDescriptions().iterator();
 		Description description;
 		while (iterator.hasNext())
@@ -51,7 +51,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 			DescriptionModel.dao.delete(description);
 		}
 		// TODO delete Cproblem and Submission ?
-		
+
 		return dao.deleteById(problem.getId());
 	}
 

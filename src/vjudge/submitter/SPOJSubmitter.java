@@ -23,7 +23,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
-public class SPOJSubmitter extends Submitter {
+public class SPOJSubmitter extends Submitter
+{
 
 	static final String OJ_NAME = "SPOJ";
 	static private HttpClient clientList[];
@@ -31,32 +32,39 @@ public class SPOJSubmitter extends Submitter {
 	static private String[] usernameList;
 	static private String[] passwordList;
 
-	static {
+	static
+	{
 		List<String> uList = new ArrayList<String>(), pList = new ArrayList<String>();
-		try {
+		try
+		{
 			FileReader fr = new FileReader(ApplicationContainer.sc.getRealPath("WEB-INF" + File.separator + "accounts.conf"));
 			BufferedReader br = new BufferedReader(fr);
-			while (br.ready()) {
+			while (br.ready())
+			{
 				String info[] = br.readLine().split("\\s+");
-				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME)){
+				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME))
+				{
 					uList.add(info[1]);
 					pList.add(info[2]);
 				}
 			}
 			br.close();
 			fr.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		usernameList = uList.toArray(new String[0]);
 		passwordList = pList.toArray(new String[0]);
 		using = new boolean[usernameList.length];
 		clientList = new HttpClient[usernameList.length];
-		for (int i = 0; i < clientList.length; i++){
+		for (int i = 0; i < clientList.length; i++)
+		{
 			clientList[i] = new HttpClient();
-			clientList[i].getParams().setParameter(HttpMethodParams.USER_AGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8");
+			clientList[i].getParams().setParameter(HttpMethodParams.USER_AGENT,
+					"Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8");
 			clientList[i].getHttpConnectionManager().getParams().setConnectionTimeout(60000);
-			clientList[i].getHttpConnectionManager().getParams().setSoTimeout(60000);  
+			clientList[i].getHttpConnectionManager().getParams().setSoTimeout(60000);
 		}
 
 		Map<String, String> languageList = new TreeMap<String, String>();
@@ -103,8 +111,9 @@ public class SPOJSubmitter extends Submitter {
 		languageList.put("35", "JavaScript (rhino 1.7R1-2)");
 		sc.setAttribute("SPOJ", languageList);
 	}
-	
-	private void getMaxRunId() throws Exception {
+
+	private void getMaxRunId() throws Exception
+	{
 		// 获取当前最大RunID
 		GetMethod getMethod = new GetMethod("http://www.spoj.com/status");
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
@@ -114,16 +123,18 @@ public class SPOJSubmitter extends Submitter {
 		byte[] responseBody = getMethod.getResponseBody();
 		String tLine = new String(responseBody, "UTF-8");
 		Matcher m = p.matcher(tLine);
-		if (m.find()) {
+		if (m.find())
+		{
 			maxRunId = Integer.parseInt(m.group(1));
 			System.out.println("maxRunId : " + maxRunId);
-		} else {
+		} else
+		{
 			throw new Exception();
 		}
 	}
 
-	
-	private void submit(String username, String password) throws Exception{
+	private void submit(String username, String password) throws Exception
+	{
 		Problem problem = (Problem) baseService.query(Problem.class, submission.getProblem().getId());
 		PostMethod postMethod = new PostMethod("http://www.spoj.com/submit/complete/");
 
@@ -134,46 +145,54 @@ public class SPOJSubmitter extends Submitter {
 		postMethod.addParameter("file", submission.getSource());
 		postMethod.addParameter("submit", "Send");
 		postMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		httpClient.getParams().setContentCharset("UTF-8"); 
+		httpClient.getParams().setContentCharset("UTF-8");
 
 		System.out.println("submit...");
 		int statusCode = httpClient.executeMethod(postMethod);
 		System.out.println("statusCode = " + statusCode);
 		byte[] responseBody = postMethod.getResponseBody();
 		String tLine = new String(responseBody, "UTF-8");
-		if (tLine.contains("submit in this language for this problem")){
+		if (tLine.contains("submit in this language for this problem"))
+		{
 			throw new Exception("judge_exception:Language Error");
 		}
-		if (tLine.contains("solution is too long")){
+		if (tLine.contains("solution is too long"))
+		{
 			throw new Exception("judge_exception:Code length exceeded");
 		}
-		//注意:此处判断登陆成功条件并不充分,相当于默认成功
+		// 注意:此处判断登陆成功条件并不充分,相当于默认成功
 	}
-	
-	public void getResult(String username) throws Exception{
+
+	public void getResult(String username) throws Exception
+	{
 		String reg = "id=\"max_id\" value=\"(\\d+)[\\s\\S]*?<td class=\"statusres\"[\\s\\S]*?>([\\s\\S]*?)</td>\n<td[\\s\\S]*?>([\\s\\S]*?)</td>\n<td[\\s\\S]*?>([\\s\\S]*?)</td>", result;
 		Pattern p = Pattern.compile(reg);
 		GetMethod getMethod = new GetMethod("http://www.spoj.com/status/" + username);
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
 		long cur = new Date().getTime(), interval = 2000;
-		while (new Date().getTime() - cur < 600000){
+		while (new Date().getTime() - cur < 600000)
+		{
 			System.out.println("getResult...");
 			httpClient.executeMethod(getMethod);
 			byte[] responseBody = getMethod.getResponseBody();
 			String tLine = new String(responseBody, "UTF-8");
 			Matcher m = p.matcher(tLine);
-			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId){
+			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId)
+			{
 				result = m.group(2).replaceAll("edit", "").replaceAll(">run<", "><").replaceAll("<[\\s\\S]*?>", "").replaceAll("&nbsp;", "").trim();
 				submission.setStatus(result);
 				submission.setRealRunId(m.group(1));
-				if (!result.contains("ing")){
-					if (result.contains("accepted")){
+				if (!result.contains("ing"))
+				{
+					if (result.contains("accepted"))
+					{
 						submission.setStatus("Accepted");
 						result = m.group(4).trim();
 						int mul = result.contains("M") ? 1024 : 1;
-						submission.setMemory((int)(0.5 + mul * Double.parseDouble(result.replaceAll("[Mk]", ""))));
-						submission.setTime((int)(0.5 + 1000 * Double.parseDouble(m.group(3).replaceAll("<[\\s\\S]*?>", "").trim())));
-					} else if (result.contains("compilation error")) {
+						submission.setMemory((int) (0.5 + mul * Double.parseDouble(result.replaceAll("[Mk]", ""))));
+						submission.setTime((int) (0.5 + 1000 * Double.parseDouble(m.group(3).replaceAll("<[\\s\\S]*?>", "").trim())));
+					} else if (result.contains("compilation error"))
+					{
 						getAdditionalInfo(submission.getRealRunId());
 					}
 					baseService.addOrModify(submission);
@@ -186,73 +205,90 @@ public class SPOJSubmitter extends Submitter {
 		}
 		throw new Exception();
 	}
-	
-	private void getAdditionalInfo(String runId) throws HttpException, IOException {
+
+	private void getAdditionalInfo(String runId) throws HttpException, IOException
+	{
 		GetMethod getMethod = new GetMethod("http://www.spoj.com/error/" + runId);
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
 
 		httpClient.executeMethod(getMethod);
 		String additionalInfo = Tools.getHtml(getMethod, null);
-		
+
 		submission.setAdditionalInfo("<pre>" + Tools.regFind(additionalInfo, "<div align=\"left\"><pre><small>([\\s\\S]*?)</small></pre>") + "</pre>");
 	}
 
-	private int getIdleClient() {
+	private int getIdleClient()
+	{
 		int length = usernameList.length;
 		int begIdx = (int) (Math.random() * length);
 
-		while(true) {
-			synchronized (using) {
-				for (int i = begIdx, j; i < begIdx + length; i++) {
+		while (true)
+		{
+			synchronized (using)
+			{
+				for (int i = begIdx, j; i < begIdx + length; i++)
+				{
 					j = i % length;
-					if (!using[j]) {
+					if (!using[j])
+					{
 						using[j] = true;
 						httpClient = clientList[j];
 						return j;
 					}
 				}
 			}
-			try {
+			try
+			{
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void work() {
+	public void work()
+	{
 		idx = getIdleClient();
 		int errorCode = 1;
 
-		try {
+		try
+		{
 			getMaxRunId();
-				
-			submit(usernameList[idx], passwordList[idx]);	//非登陆式,只需交一次
+
+			submit(usernameList[idx], passwordList[idx]); // 非登陆式,只需交一次
 			errorCode = 2;
 			submission.setStatus("Running & Judging");
 			baseService.addOrModify(submission);
 			Thread.sleep(2000);
 			getResult(usernameList[idx]);
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
-			if (e.getMessage() != null && e.getMessage().startsWith("judge_exception:")){
+			if (e.getMessage() != null && e.getMessage().startsWith("judge_exception:"))
+			{
 				submission.setStatus(e.getMessage().substring(16));
-			} else {
+			} else
+			{
 				submission.setStatus("Judging Error " + errorCode);
 			}
 			baseService.addOrModify(submission);
 		}
-		
+
 	}
 
 	@Override
-	public void waitForUnfreeze() {
-		try {
+	public void waitForUnfreeze()
+	{
+		try
+		{
 			Thread.sleep(10000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			e.printStackTrace();
-		}	//client冷却时间
-		synchronized (using) {
+		} // client冷却时间
+		synchronized (using)
+		{
 			using[idx] = false;
 		}
 	}
