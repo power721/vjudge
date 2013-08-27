@@ -3,6 +3,7 @@ package vjudge.config;
 import vjudge.action.MainController;
 import vjudge.model.DescriptionModel;
 import vjudge.model.ProblemModel;
+import vjudge.test.SpiderTest;
 
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
@@ -32,6 +33,7 @@ public class JudgeConfig extends JFinalConfig
 	{
 		// TODO Auto-generated method stub
 		me.add("/", MainController.class);
+		me.add("/spider", SpiderTest.class);
 	}
 
 	@Override

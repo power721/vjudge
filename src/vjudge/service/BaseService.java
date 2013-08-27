@@ -26,7 +26,8 @@ public class BaseService implements IBaseService
 	{
 		// BaseService.baseDao.addOrModify(entity);
 		String beanClassName = bean.getClass().getName();
-		String modelClassName = beanClassName + "Model";
+		String modelClassName = beanClassName.replace("bean", "model") + "Model";
+		System.out.println(modelClassName);
 		try
 		{
 			baseDao = (BaseModel) Class.forName(modelClassName).newInstance();
