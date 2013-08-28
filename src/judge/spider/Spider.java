@@ -5,25 +5,12 @@ import judge.model.ProblemModel;
 import judge.service.BaseService;
 import judge.service.IBaseService;
 
-public abstract class Spider extends Thread implements Cloneable
+public abstract class Spider extends Thread
 {
 	static public IBaseService baseService = BaseService.baseService;
 
 	public ProblemModel problem;
 	public DescriptionModel description;
-
-	public Object clone()
-	{
-		Spider o = null;
-		try
-		{
-			o = (Spider) super.clone();
-		} catch (CloneNotSupportedException e)
-		{
-			e.printStackTrace();
-		}
-		return o;
-	}
 
 	/**
 	 * 抓取题目,对problem和description进行赋值
