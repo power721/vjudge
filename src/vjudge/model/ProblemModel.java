@@ -31,12 +31,15 @@ public class ProblemModel extends BaseModel<ProblemModel>
 
 	public boolean deleteModel()
 	{
-		Iterator<DescriptionModel> iterator = getDescriptions().iterator();
-		DescriptionModel description;
-		while (iterator.hasNext())
+		if (getDescriptions() != null)
 		{
-			description = (DescriptionModel) iterator.next();
-			description.delete();
+			Iterator<DescriptionModel> iterator = getDescriptions().iterator();
+			DescriptionModel description;
+			while (iterator.hasNext())
+			{
+				description = (DescriptionModel) iterator.next();
+				description.delete();
+			}
 		}
 		// TODO delete cproblems and submissions
 
