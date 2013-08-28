@@ -17,35 +17,34 @@ public class ProblemModel extends BaseModel<ProblemModel>
 	@Override
 	public boolean addOrModify()
 	{
-		boolean insertFlag = false;
+		boolean flag = false;
 		ProblemModel problemModel = (ProblemModel) dao.findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1", getOriginOJ(),
 				getOriginProb());
 		if (problemModel == null)
 		{
-			insertFlag = true;
-		}
-
-		if (insertFlag)
-		{
 			return save();
 		}
-		return problemModel.update();
+
+		problemModel.setAttrs(this);
+		flag = problemModel.update();
+		setAttrs(problemModel);
+		return flag;
 	}
 
 	public boolean deleteModel()
 	{
 		Iterator<DescriptionModel> iterator = getDescriptions().iterator();
 		DescriptionModel description;
-        while (iterator.hasNext())
-        {
-                description = (DescriptionModel) iterator.next();
-                description.delete();
-        }
-        // TODO delete cproblems and submissions
-        
+		while (iterator.hasNext())
+		{
+			description = (DescriptionModel) iterator.next();
+			description.delete();
+		}
+		// TODO delete cproblems and submissions
+
 		return delete();
 	}
-	
+
 	public int getId()
 	{
 		return get("C_ID");
