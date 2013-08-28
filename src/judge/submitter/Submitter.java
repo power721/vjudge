@@ -9,7 +9,7 @@ import judge.tool.ApplicationContainer;
 
 import org.apache.commons.httpclient.HttpClient;
 
-public abstract class Submitter extends Thread implements Cloneable
+public abstract class Submitter extends Thread
 {
 	static public ServletContext sc = ApplicationContainer.sc;
 	static public IBaseService baseService = BaseService.baseService;
@@ -43,19 +43,6 @@ public abstract class Submitter extends Thread implements Cloneable
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public Object clone()
-	{
-		Submitter o = null;
-		try
-		{
-			o = (Submitter) super.clone();
-		} catch (CloneNotSupportedException e)
-		{
-			e.printStackTrace();
-		}
-		return o;
 	}
 
 	public SubmissionModel getSubmission()
