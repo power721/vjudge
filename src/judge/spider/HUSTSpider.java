@@ -1,47 +1,35 @@
 package judge.spider;
 
+import judge.tool.HtmlHandleUtil;
 import judge.tool.Tools;
 
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
-public class HUSTSpider extends Spider
-{
 
-	public void crawl() throws Exception
-	{
+public class HUSTSpider extends Spider {
+
+	public void crawl() throws Exception{
 
 		String html = "";
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://acm.hust.edu.cn/problem.php?id=" + problem.getOriginProb());
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		try
-		{
+		try {
 			int statusCode = httpClient.executeMethod(getMethod);
-			if (statusCode != HttpStatus.SC_OK)
-			{
-				System.err.println("Method failed: " + getMethod.getStatusLine());
+			if(statusCode != HttpStatus.SC_OK) {
+				System.err.println("Method failed: "+getMethod.getStatusLine());
 			}
 			html = Tools.getHtml(getMethod, null);
-		} catch (Exception e)
-		{
+			html = HtmlHandleUtil.transformUrlToAbs(html, getMethod.getURI().toString());
+		} catch(Exception e) {
 			getMethod.releaseConnection();
 			throw new Exception();
 		}
 
-		if (html.contains("<title>No Such Problem!</title>"))
-		{
-			throw new Exception();
-		}
-
-		html = html.replaceAll("src=/", "src=http://acm.hust.edu.cn");
-		html = html.replaceAll("src='/", "src='http://acm.hust.edu.cn");
-		html = html.replaceAll("src=\"/", "src=\"http://acm.hust.edu.cn");
-
 		problem.setTitle(Tools.regFind(html, "<title>[\\s\\S]*?-- ([\\s\\S]*?)</title>").trim());
-		if (problem.getTitle().isEmpty())
-		{
+		if (problem.getTitle().isEmpty()){
 			throw new Exception();
 		}
 

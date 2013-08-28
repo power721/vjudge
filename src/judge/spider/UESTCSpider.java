@@ -1,19 +1,18 @@
 package judge.spider;
 
+import judge.tool.HtmlHandleUtil;
 import judge.tool.Tools;
 
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
-public class UESTCSpider extends Spider
-{
 
-	public void crawl() throws Exception
-	{
+public class UESTCSpider extends Spider {
 
-		if (!problem.getOriginProb().matches("[1-9]\\d*"))
-		{
+	public void crawl() throws Exception{
+
+		if (!problem.getOriginProb().matches("[1-9]\\d*")) {
 			throw new Exception();
 		}
 
@@ -21,23 +20,20 @@ public class UESTCSpider extends Spider
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://222.197.181.5/problem.php?pid=" + problem.getOriginProb());
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		try
-		{
+		try {
 			int statusCode = httpClient.executeMethod(getMethod);
-			if (statusCode != HttpStatus.SC_OK)
-			{
+			if(statusCode != HttpStatus.SC_OK) {
 				System.err.println("Method failed: " + getMethod.getStatusLine());
 			}
-			html = Tools.getHtml(getMethod, null).replaceAll("<div class=\"bg\">\\s*</div>", "")
-					.replaceAll("(?i)(src|href)\\s*=\\s*(['\"]?)\\s*(?!\\s*['\"]?\\s*http)", "$1=$2http://222.197.181.5/");
-		} finally
-		{
+			html = Tools.getHtml(getMethod, null);
+			html = html.replaceAll("<div class=\"bg\">\\s*</div>", "");
+			html = HtmlHandleUtil.transformUrlToAbs(html, getMethod.getURI().toString());
+		} finally {
 			getMethod.releaseConnection();
 		}
 
 		problem.setTitle(Tools.regFind(html, problem.getOriginProb() + " - ([\\s\\S]*?) - UESTC Online Judge").trim());
-		if (problem.getTitle().isEmpty())
-		{
+		if (problem.getTitle().isEmpty()){
 			throw new Exception();
 		}
 
