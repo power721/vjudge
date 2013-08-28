@@ -2,6 +2,7 @@ package judge.model;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class ProblemModel extends BaseModel<ProblemModel>
@@ -29,11 +30,13 @@ public class ProblemModel extends BaseModel<ProblemModel>
 		return update();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public boolean deleteModel()
 	{
-		if (getDescriptions() != null)
+		List<BaseModel> descriptions = DescriptionModel.dao.find("SELECT * FROM t_description WHERE C_PROBLEM_ID=?", getId());
+		if(descriptions != null)
 		{
-			Iterator<DescriptionModel> iterator = getDescriptions().iterator();
+			Iterator<BaseModel> iterator = descriptions.iterator();
 			DescriptionModel description;
 			while (iterator.hasNext())
 			{
@@ -43,6 +46,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 		}
 		// TODO delete cproblems and submissions
 
+		getLog().info("Delete problem: " + getOriginOJ() + "-" + getOriginProb());
 		return delete();
 	}
 
