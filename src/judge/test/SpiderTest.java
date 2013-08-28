@@ -39,7 +39,9 @@ public class SpiderTest extends BaseController
 		run("NBUT", new NBUTSpider());
 
 		run("POJ", new POJSpider());
-
+		
+		run("SCU", new SCUSpider());
+		
 		run("SGU", "100", new SGUSpider());
 
 		run("SPOJ", "ABA12B", new SPOJSpider());
@@ -105,6 +107,11 @@ public class SpiderTest extends BaseController
 	public void poj()
 	{
 		run("POJ", new POJSpider());
+	}
+	
+	public void scu()
+	{
+		run("SCU", new SCUSpider());
 	}
 	
 	public void sgu()
