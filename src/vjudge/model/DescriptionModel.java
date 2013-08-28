@@ -19,10 +19,11 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 		{
 			set("C_PROBLEM_ID", problem.getId());
 		}
-		DescriptionModel descriptionModel = (DescriptionModel) findFirst("SELECT * FROM t_description WHERE C_PROBLEM_ID=? AND C_AUTHOR=?", problem.getId(),
-				getAuthor());
+		DescriptionModel descriptionModel = (DescriptionModel) findFirst("SELECT * FROM t_description WHERE C_PROBLEM_ID=? AND C_AUTHOR=?",
+				get("C_PROBLEM_ID"), getAuthor());
 		if (descriptionModel == null)
 		{
+			getLog().info("Insert new problem description: " + get("C_PROBLEM_ID") + "-" + getAuthor());
 			return save();
 		}
 

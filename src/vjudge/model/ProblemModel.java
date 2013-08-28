@@ -21,6 +21,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 				getOriginProb());
 		if (problemModel == null)
 		{
+			getLog().info("Insert new problem: " + getOriginOJ() + "-" + getOriginProb());
 			return save();
 		}
 
