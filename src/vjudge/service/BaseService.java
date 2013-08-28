@@ -22,34 +22,14 @@ public class BaseService implements IBaseService
 	public static BaseService baseService = new BaseService();
 	static private BaseModel baseDao;
 
-	public void addOrModify(Object bean)
+	public void addOrModify(BaseModel model)
 	{
-		// BaseService.baseDao.addOrModify(entity);
-		String beanClassName = bean.getClass().getName();
-		String modelClassName = beanClassName.replace("bean", "model") + "Model";
-		System.out.println(modelClassName);
-		try
-		{
-			baseDao = (BaseModel) Class.forName(modelClassName).newInstance();
-		} catch (InstantiationException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		baseDao.addOrModify(bean);
+		model.addOrModify();
 	}
 
-	public void delete(Object entity)
+	public void delete(BaseModel model)
 	{
-		// BaseService.baseDao.delete(entity);
+		model.deleteModel();
 	}
 
 	public void delete(Class entityClass, Serializable id)

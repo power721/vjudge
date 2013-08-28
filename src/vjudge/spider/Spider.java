@@ -1,7 +1,7 @@
 package vjudge.spider;
 
-import vjudge.bean.Description;
-import vjudge.bean.Problem;
+import vjudge.model.DescriptionModel;
+import vjudge.model.ProblemModel;
 import vjudge.service.BaseService;
 import vjudge.service.IBaseService;
 
@@ -9,8 +9,8 @@ public abstract class Spider extends Thread implements Cloneable
 {
 	static public IBaseService baseService = BaseService.baseService;
 
-	public Problem problem;
-	public Description description;
+	public ProblemModel problem;
+	public DescriptionModel description;
 
 	public Object clone()
 	{
@@ -56,22 +56,22 @@ public abstract class Spider extends Thread implements Cloneable
 		}
 	}
 
-	public Problem getProblem()
+	public ProblemModel getProblem()
 	{
 		return problem;
 	}
 
-	public void setProblem(Problem problem)
+	public void setProblem(ProblemModel problem)
 	{
 		this.problem = problem;
 	}
 
-	public Description getDescription()
+	public DescriptionModel getDescription()
 	{
 		return description;
 	}
 
-	public void setDescription(Description description)
+	public void setDescription(DescriptionModel description)
 	{
 		this.description = description;
 	}

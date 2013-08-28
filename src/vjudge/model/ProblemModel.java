@@ -1,74 +1,177 @@
 package vjudge.model;
 
+import java.util.Date;
 import java.util.Iterator;
-
-import vjudge.bean.Description;
-import vjudge.bean.Problem;
+import java.util.Set;
 
 public class ProblemModel extends BaseModel<ProblemModel>
 {
 	private static final long serialVersionUID = -7026460598310425085L;
 
+	private Set<DescriptionModel> descriptions;
+	private Set<CproblemModel> cproblems;
+	private Set<SubmissionModel> submissions;
+
 	public static final ProblemModel dao = new ProblemModel();
 
-	public ProblemModel find(Problem problem)
-	{
-		ProblemModel problemModel = (ProblemModel) dao.findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1",
-				problem.getOriginOJ(), problem.getOriginProb());
-		return problemModel;
-	}
-
 	@Override
-	public boolean addOrModify(Object bean)
+	public boolean addOrModify()
 	{
-		Problem problem = (Problem) bean;
 		boolean insertFlag = false;
-		ProblemModel problemModel = (ProblemModel) problem.getModel();
+		ProblemModel problemModel = (ProblemModel) dao.findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1", getOriginOJ(),
+				getOriginProb());
 		if (problemModel == null)
 		{
-			problemModel = find(problem);
-			if (problemModel == null)
-			{
-				problemModel = new ProblemModel();
-				problem.setModel(problemModel);
-				insertFlag = true;
-			}
+			insertFlag = true;
 		}
-
-		problemModel.set("C_TITLE", problem.getTitle());
-		problemModel.set("C_SOURCE", problem.getSource());
-		problemModel.set("C_URL", problem.getUrl());
-		problemModel.set("C_originOJ", problem.getOriginOJ());
-		problemModel.set("C_originProb", problem.getOriginProb());
-		problemModel.set("C_MEMORYLIMIT", problem.getMemoryLimit());
-		problemModel.set("C_TIMELIMIT", problem.getTimeLimit());
-		problemModel.set("C_TRIGGER_TIME", problem.getTriggerTime());
-		// what to do with descriptions, cproblems, submissions?
 
 		if (insertFlag)
 		{
-			problemModel.save();
-			problem.setId(problemModel.getInt("C_ID"));
-			return problem.getId() != 0;
+			return save();
 		}
 		return problemModel.update();
 	}
 
-	@Override
-	public boolean delete(Object bean)
+	public boolean deleteModel()
 	{
-		Problem problem = (Problem) bean;
+		Iterator<DescriptionModel> iterator = getDescriptions().iterator();
+		DescriptionModel description;
+        while (iterator.hasNext())
+        {
+                description = (DescriptionModel) iterator.next();
+                description.delete();
+        }
+        // TODO delete cproblems and submissions
+        
+		return delete();
+	}
+	
+	public int getId()
+	{
+		return get("C_ID");
+	}
 
-		Iterator<Description> iterator = problem.getDescriptions().iterator();
-		Description description;
-		while (iterator.hasNext())
+	public void setId(int id)
+	{
+		set("C_ID", id);
+	}
+
+	public String getTitle()
+	{
+		return get("C_TITLE");
+	}
+
+	public void setTitle(String title)
+	{
+		set("C_TITLE", title);
+	}
+
+	public String getSource()
+	{
+		return get("C_SOURCE");
+	}
+
+	public void setSource(String source)
+	{
+		if (source != null)
 		{
-			description = (Description) iterator.next();
-			DescriptionModel.dao.delete(description);
+			source = source.trim();
+			if (source.matches("(<[^<>]*>\\s*)*"))
+			{
+				source = "";
+			}
 		}
-		// TODO delete Cproblem and Submission ?
+		set("C_SOURCE", source);
+	}
 
-		return dao.deleteById(problem.getId());
+	public String getUrl()
+	{
+		return get("C_URL");
+	}
+
+	public void setUrl(String url)
+	{
+		set("C_URL", url);
+	}
+
+	public String getOriginOJ()
+	{
+		return get("C_originOJ");
+	}
+
+	public void setOriginOJ(String originOJ)
+	{
+		set("C_originOJ", originOJ);
+	}
+
+	public String getOriginProb()
+	{
+		return get("C_originProb");
+	}
+
+	public void setOriginProb(String originProb)
+	{
+		set("C_originProb", originProb);
+	}
+
+	public int getMemoryLimit()
+	{
+		return get("C_MEMORYLIMIT");
+	}
+
+	public void setMemoryLimit(int memoryLimit)
+	{
+		set("C_MEMORYLIMIT", memoryLimit);
+	}
+
+	public int getTimeLimit()
+	{
+		return get("C_TIMELIMIT");
+	}
+
+	public void setTimeLimit(int timeLimit)
+	{
+		set("C_TIMELIMIT", timeLimit);
+	}
+
+	public Date getTriggerTime()
+	{
+		return get("C_TRIGGER_TIME");
+	}
+
+	public void setTriggerTime(Date triggerTime)
+	{
+		set("C_TRIGGER_TIME", triggerTime);
+	}
+
+	public Set<DescriptionModel> getDescriptions()
+	{
+		return descriptions;
+	}
+
+	public void setDescriptions(Set<DescriptionModel> descriptions)
+	{
+		this.descriptions = descriptions;
+	}
+
+	public Set<CproblemModel> getCproblems()
+	{
+		return cproblems;
+	}
+
+	public void setCproblems(Set<CproblemModel> cproblems)
+	{
+		this.cproblems = cproblems;
+	}
+
+	public Set<SubmissionModel> getSubmissions()
+	{
+		return submissions;
+	}
+
+	public void setSubmissions(Set<SubmissionModel> submissions)
+	{
+		this.submissions = submissions;
 	}
 
 }

@@ -1,57 +1,184 @@
 package vjudge.model;
 
-import vjudge.bean.Description;
+import java.util.Date;
+import java.util.Set;
 
 public class DescriptionModel extends BaseModel<DescriptionModel>
 {
 	private static final long serialVersionUID = -376409847087991812L;
 
+	private ProblemModel problem;
+	private Set<CproblemModel> cproblems;
+
 	public static final DescriptionModel dao = new DescriptionModel();
 
-	public DescriptionModel find(Description description)
-	{
-		DescriptionModel descriptionModel = (DescriptionModel) dao.find("SELECT * FROM t_description WHERE C_PROBLEM_ID=?", description.getProblem().getId());
-		return descriptionModel;
-	}
-
 	@Override
-	public boolean addOrModify(Object bean)
+	public boolean addOrModify()
 	{
-		Description description = (Description) bean;
 		boolean insertFlag = false;
-		DescriptionModel descriptionModel = (DescriptionModel) description.getModel();
+		DescriptionModel descriptionModel = (DescriptionModel) dao.findFirst("");
 		if (descriptionModel == null)
 		{
-			descriptionModel = new DescriptionModel();
-			description.setModel(descriptionModel);
 			insertFlag = true;
 		}
 
-		descriptionModel.set("C_DESCRIPTION", description.getDescription());
-		descriptionModel.set("C_INPUT", description.getInput());
-		descriptionModel.set("C_OUTPUT", description.getOutput());
-		descriptionModel.set("C_SAMPLEINPUT", description.getSampleInput());
-		descriptionModel.set("C_SAMPLEOUTPUT", description.getSampleOutput());
-		descriptionModel.set("C_HINT", description.getHint());
-		descriptionModel.set("C_PROBLEM_ID", description.getProblem().getId());
-		descriptionModel.set("C_UPDATE_TIME", description.getUpdateTime());
-		descriptionModel.set("C_AUTHOR", description.getAuthor());
-		descriptionModel.set("C_REMARKS", description.getRemarks());
-		descriptionModel.set("C_VOTE", description.getVote());
-
 		if (insertFlag)
 		{
-			descriptionModel.save();
-			description.setId(descriptionModel.getInt("C_ID"));
-			return description.getId() != 0;
+			return save();
 		}
 		return descriptionModel.update();
 	}
 
-	@Override
-	public boolean delete(Object bean)
+	/**
+	 * 去除空标签
+	 * 
+	 * @param string
+	 * @return
+	 */
+	private String trans(String string)
 	{
-		Description description = (Description) bean;
-		return dao.deleteById(description.getId());
+		if (string != null)
+		{
+			string = string.replaceAll("(?i)(?<=(\\b|java))script\\b", "ｓcript").trim();
+			if (!string.contains("img") && !string.contains("IMG") && !string.contains("iframe") && string.matches("(<[^<>]*>\\s*)*"))
+			{
+				string = "";
+			}
+		}
+		return string;
 	}
+
+	// @JSON(deserialize=false,serialize=false)
+	public ProblemModel getProblem()
+	{
+		return problem;
+	}
+
+	public void setProblem(ProblemModel problem)
+	{
+		this.problem = problem;
+	}
+
+	public int getId()
+	{
+		return get("C_ID");
+	}
+
+	public void setId(int id)
+	{
+		set("C_ID", id);
+	}
+
+	public String getDescription()
+	{
+		return get("C_DESCRIPTION");
+	}
+
+	public void setDescription(String description)
+	{
+		set("C_DESCRIPTION", trans(description));
+	}
+
+	public String getInput()
+	{
+		return get("C_INPUT");
+	}
+
+	public void setInput(String input)
+	{
+		set("C_INPUT", trans(input));
+	}
+
+	public String getOutput()
+	{
+		return get("C_OUTPUT");
+	}
+
+	public void setOutput(String output)
+	{
+		set("C_OUTPUT", trans(output));
+	}
+
+	public String getSampleInput()
+	{
+		return get("C_SAMPLEINPUT");
+	}
+
+	public void setSampleInput(String sampleInput)
+	{
+		set("C_SAMPLEINPUT", trans(sampleInput));
+	}
+
+	public String getSampleOutput()
+	{
+		return get("C_SAMPLEOUTPUT");
+	}
+
+	public void setSampleOutput(String sampleOutput)
+	{
+		set("C_SAMPLEOUTPUT", trans(sampleOutput));
+	}
+
+	public String getHint()
+	{
+		return get("C_HINT");
+	}
+
+	public void setHint(String hint)
+	{
+		set("C_HINT", trans(hint));
+	}
+
+	// @JSON(format="yyyy-MM-dd")
+	public Date getUpdateTime()
+	{
+		return get("C_UPDATE_TIME");
+	}
+
+	public void setUpdateTime(Date updateTime)
+	{
+		set("C_UPDATE_TIME", updateTime);
+	}
+
+	public String getAuthor()
+	{
+		return get("C_AUTHOR");
+	}
+
+	public void setAuthor(String author)
+	{
+		set("C_AUTHOR", author);
+	}
+
+	public String getRemarks()
+	{
+		return get("C_REMARKS");
+	}
+
+	public void setRemarks(String remarks)
+	{
+		set("C_REMARKS", remarks);
+	}
+
+	public int getVote()
+	{
+		return get("C_VOTE");
+	}
+
+	public void setVote(int vote)
+	{
+		set("C_VOTE", vote);
+	}
+
+	// @JSON(deserialize=false,serialize=false)
+	public Set<CproblemModel> getCproblems()
+	{
+		return cproblems;
+	}
+
+	public void setCproblems(Set<CproblemModel> cproblems)
+	{
+		this.cproblems = cproblems;
+	}
+
 }

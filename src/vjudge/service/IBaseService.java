@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import vjudge.model.BaseModel;
+
 @SuppressWarnings("rawtypes")
 public interface IBaseService
 {
@@ -13,14 +15,14 @@ public interface IBaseService
 	 * @param entity
 	 *            实体的类
 	 */
-	public void addOrModify(Object entity);
+	public void addOrModify(BaseModel model);
 
 	/**
 	 * 删除实体
 	 * 
 	 * @param entity
 	 */
-	public void delete(Object entity);
+	public void delete(BaseModel model);
 
 	/**
 	 * 按照ID删除

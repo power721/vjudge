@@ -2,10 +2,10 @@ package vjudge.test;
 
 import java.util.Date;
 
+import vjudge.model.DescriptionModel;
+import vjudge.model.ProblemModel;
 import vjudge.spider.Spider;
 import vjudge.action.BaseController;
-import vjudge.bean.Description;
-import vjudge.bean.Problem;
 import vjudge.service.BaseService;
 import vjudge.service.IBaseService;
 import vjudge.spider.POJSpider;
@@ -20,13 +20,13 @@ public class SpiderTest extends BaseController
 		if(pid == null || pid.equals(""))
 			pid = "1000";
 		
-		Problem problem = new Problem();
+		ProblemModel problem = new ProblemModel();
 		problem.setOriginOJ("POJ");
 		problem.setOriginProb(pid);
 		problem.setTitle("Crawling……");
 		baseService.addOrModify(problem);
 		
-		Description description = new Description();
+		DescriptionModel description = new DescriptionModel();
 		description.setUpdateTime(new Date());
 		description.setAuthor("0");
 		description.setRemarks("Initialization.");

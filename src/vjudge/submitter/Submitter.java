@@ -2,6 +2,7 @@ package vjudge.submitter;
 
 import javax.servlet.ServletContext;
 
+import vjudge.model.SubmissionModel;
 import vjudge.service.BaseService;
 import vjudge.service.IBaseService;
 
@@ -9,13 +10,11 @@ import vjudge.tool.ApplicationContainer;
 
 import org.apache.commons.httpclient.HttpClient;
 
-import vjudge.bean.Submission;
-
 public abstract class Submitter extends Thread implements Cloneable
 {
 	static public ServletContext sc = ApplicationContainer.sc;
 	static public IBaseService baseService = BaseService.baseService;
-	public Submission submission;
+	public SubmissionModel submission;
 
 	protected HttpClient httpClient;
 	protected int maxRunId = 0;
@@ -60,12 +59,12 @@ public abstract class Submitter extends Thread implements Cloneable
 		return o;
 	}
 
-	public Submission getSubmission()
+	public SubmissionModel getSubmission()
 	{
 		return submission;
 	}
 
-	public void setSubmission(Submission submission)
+	public void setSubmission(SubmissionModel submission)
 	{
 		this.submission = submission;
 	}
