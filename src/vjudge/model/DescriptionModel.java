@@ -15,16 +15,17 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 	@Override
 	public boolean addOrModify()
 	{
-		if(problem != null)
+		if (problem != null)
 		{
 			set("C_PROBLEM_ID", problem.getId());
 		}
-		DescriptionModel descriptionModel = (DescriptionModel) dao.findFirst("SELECT * FROM t_description WHERE C_UPDATE_TIME=?", getUpdateTime());
+		DescriptionModel descriptionModel = (DescriptionModel) findFirst("SELECT * FROM t_description WHERE C_PROBLEM_ID=? AND C_AUTHOR=?", problem.getId(),
+				getAuthor());
 		if (descriptionModel == null)
 		{
 			return save();
 		}
-		
+
 		setId(descriptionModel.getId());
 		return update();
 	}

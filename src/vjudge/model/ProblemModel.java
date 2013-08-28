@@ -17,7 +17,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 	@Override
 	public boolean addOrModify()
 	{
-		ProblemModel problemModel = (ProblemModel) dao.findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1", getOriginOJ(),
+		ProblemModel problemModel = (ProblemModel) findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1", getOriginOJ(),
 				getOriginProb());
 		if (problemModel == null)
 		{
