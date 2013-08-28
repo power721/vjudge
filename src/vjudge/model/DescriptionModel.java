@@ -15,7 +15,6 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 	@Override
 	public boolean addOrModify()
 	{
-		boolean flag = false;
 		if(problem != null)
 		{
 			set("C_PROBLEM_ID", problem.getId());
@@ -25,11 +24,9 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 		{
 			return save();
 		}
-
-		descriptionModel.setAttrs(this);
-		flag = descriptionModel.update();
-		setAttrs(descriptionModel);
-		return flag;
+		
+		setId(descriptionModel.getId());
+		return update();
 	}
 
 	/**

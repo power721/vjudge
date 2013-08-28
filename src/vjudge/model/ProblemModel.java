@@ -17,7 +17,6 @@ public class ProblemModel extends BaseModel<ProblemModel>
 	@Override
 	public boolean addOrModify()
 	{
-		boolean flag = false;
 		ProblemModel problemModel = (ProblemModel) dao.findFirst("SELECT * FROM t_problem WHERE C_originOJ=? AND C_originProb=? LIMIT 1", getOriginOJ(),
 				getOriginProb());
 		if (problemModel == null)
@@ -25,10 +24,8 @@ public class ProblemModel extends BaseModel<ProblemModel>
 			return save();
 		}
 
-		problemModel.setAttrs(this);
-		flag = problemModel.update();
-		setAttrs(problemModel);
-		return flag;
+		setId(problemModel.getId());
+		return update();
 	}
 
 	public boolean deleteModel()
