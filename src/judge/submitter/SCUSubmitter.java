@@ -1,6 +1,9 @@
 package judge.submitter;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -11,6 +14,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 import judge.bean.Problem;
 import judge.tool.ApplicationContainer;
@@ -33,9 +38,9 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 
-public class HDUSubmitter extends Submitter {
+public class SCUSubmitter extends Submitter {
 
-	static final String OJ_NAME = "HDU";
+	static final String OJ_NAME = "SCU";
 	static private DefaultHttpClient clientList[];
 	static private boolean using[];
 	static private String[] usernameList;
@@ -46,7 +51,7 @@ public class HDUSubmitter extends Submitter {
 	private HttpPost post;
 	private HttpResponse response;
 	private HttpEntity entity;
-	private HttpHost host = new HttpHost("acm.hdu.edu.cn");
+	private HttpHost host = new HttpHost("cstest.scu.edu.cn");
 	private String html;
 
 	static {
@@ -80,20 +85,18 @@ public class HDUSubmitter extends Submitter {
 		}
 
 		Map<String, String> languageList = new TreeMap<String, String>();
-		languageList.put("0", "G++");
-		languageList.put("1", "GCC");
-		languageList.put("2", "C++");
-		languageList.put("3", "C");
-		languageList.put("4", "Pascal");
-		languageList.put("5", "Java");
-		sc.setAttribute("HDU", languageList);
+		languageList.put("C++ (G++-3)", "C++ (G++-3)");
+		languageList.put("C (GCC-3)", "C (GCC-3)");
+		languageList.put("JAVA", "JAVA");
+		languageList.put("PASCAL (GPC)", "PASCAL (GPC)");
+		sc.setAttribute("SCU", languageList);
 	}
 
 	private void getMaxRunId() throws ClientProtocolException, IOException {
-		Pattern p = Pattern.compile("<td height=22px>(\\d+)");
+		Pattern p = Pattern.compile("<td height=\"44\">(\\d+)</td>");
 
 		try {
-			get = new HttpGet("/status.php");
+			get = new HttpGet("/soj/solutions.action");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
@@ -109,55 +112,21 @@ public class HDUSubmitter extends Submitter {
 			throw new RuntimeException();
 		}
 	}
-	
-	private void login(String username, String password) throws ClientProtocolException, IOException {
-		try {
-			post = new HttpPost("/userloginex.php?action=login&cid=0&notice=0");
-			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-			nvps.add(new BasicNameValuePair("username", username));
-			nvps.add(new BasicNameValuePair("userpass", password));
-			
-			post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("gb2312")));
-			
-			response = client.execute(host, post);
-			entity = response.getEntity();
-			
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
-				throw new RuntimeException();
-			}
-		} finally {
-			EntityUtils.consume(entity);
-		}
-	}
 
-	private boolean isLoggedIn() throws ClientProtocolException, IOException {
-		try {
-			get = new HttpGet("/");
-			response = client.execute(host, get);
-			entity = response.getEntity();
-			html = EntityUtils.toString(entity);
-		} finally {
-			EntityUtils.consume(entity);
-		}
-		if (html.contains("href=\"/userloginex.php?action=logout\"")) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void submit() throws ClientProtocolException, IOException {
+	private void submit(String username, String password) throws ClientProtocolException, IOException {
 		Problem problem = (Problem) baseService.query(Problem.class, submission.getProblem().getId());
 		
 		try {
-			post = new HttpPost("/submit.php?action=submit");
+			post = new HttpPost("/soj/submit.action");
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-			nvps.add(new BasicNameValuePair("check", "0"));
+			nvps.add(new BasicNameValuePair("problemId", problem.getOriginProb()));
+			nvps.add(new BasicNameValuePair("validation", getCaptcha()));
+			nvps.add(new BasicNameValuePair("userId", username));
+			nvps.add(new BasicNameValuePair("password", password));
 			nvps.add(new BasicNameValuePair("language", submission.getLanguage()));
-			nvps.add(new BasicNameValuePair("problemid", problem.getOriginProb()));
-			nvps.add(new BasicNameValuePair("usercode", submission.getSource()));
+			nvps.add(new BasicNameValuePair("source", submission.getSource()));
 			
-			post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("gb2312")));
+			post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("GBK")));
 			
 			response = client.execute(host, post);
 			entity = response.getEntity();
@@ -167,16 +136,45 @@ public class HDUSubmitter extends Submitter {
 			}
 		} finally {
 			EntityUtils.consume(entity);
+		}
+	}
+
+	private String getCaptcha() throws ClientProtocolException, IOException {
+		File captchaPic = new File("scu_captcha_" + idx + ".jpg");
+		try {
+			get = new HttpGet("/soj/validation_code");
+			response = client.execute(host, get);
+			entity = response.getEntity();
+			
+			FileOutputStream fos = new FileOutputStream(captchaPic);
+		    entity.writeTo(fos);
+		    fos.close();
+
+		    BufferedImage img = ImageIO.read(captchaPic);
+		    return SCUCaptchaRecognizer.recognize(img);
+		} finally {
+			EntityUtils.consume(entity);
+			if (captchaPic.exists()) {
+				captchaPic.delete();
+			}
 		}
 	}
 
 	public void getResult(String username) throws Exception{
-		Pattern p = Pattern.compile(">(\\d{7,})</td><td>[\\s\\S]*?</td><td>([\\s\\S]*?)</td><td>[\\s\\S]*?</td><td>(\\d*?)MS</td><td>(\\d*?)K</td>");
+		Pattern p = Pattern.compile(
+			"<td height=\"44\">(\\d+)</td>\\s*" +
+			"<td>.*?</td>\\s*" +
+			"<td>.*?</td>\\s*" +
+			"<td>.*?</td>\\s*" +
+			"<td>[\\s\\S]*?</td>\\s*" +
+			"<td>([\\s\\S]*?)</td>\\s*" +
+			"<td>(\\d+)</td>\\s*" +
+			"<td>(\\d+)</td>");
 
 		long cur = new Date().getTime(), interval = 2000;
 		while (new Date().getTime() - cur < 600000){
 			try {
-				get = new HttpGet("/status.php?user=" + username);
+				get = new HttpGet("/soj/solutions.action?userId=" + username);
 				response = client.execute(host, get);
 				entity = response.getEntity();
 				html = EntityUtils.toString(entity);
@@ -186,19 +184,19 @@ public class HDUSubmitter extends Submitter {
 
 			Matcher m = p.matcher(html);
 			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId) {
-				String result = m.group(2).replaceAll("<[\\s\\S]*?>", "").trim();
+				String result = m.group(2).replace("<BR>", " ").replaceAll("<.*?>", "").trim();
 				submission.setStatus(result);
 				submission.setRealRunId(m.group(1));
-    			if (!result.contains("ing")){
-    				if (result.equals("Accepted")){
-	    				submission.setTime(Integer.parseInt(m.group(3)));
-	    				submission.setMemory(Integer.parseInt(m.group(4)));
-    				} else if (result.contains("Compilation")) {
+				if (!result.contains("ing")){
+					if (result.equals("Accepted")){
+						submission.setTime(Integer.parseInt(m.group(3)));
+						submission.setMemory(Integer.parseInt(m.group(4)));
+					} else if (result.contains("Compilation")) {
 						getAdditionalInfo(submission.getRealRunId());
 					}
-    				baseService.addOrModify(submission);
-    				return;
-    			}
+					baseService.addOrModify(submission);
+					return;
+				}
 				baseService.addOrModify(submission);
 			}
 			Thread.sleep(interval);
@@ -209,10 +207,10 @@ public class HDUSubmitter extends Submitter {
 
 	private void getAdditionalInfo(String runId) throws HttpException, IOException {
 		try {
-			get = new HttpGet("/viewerror.php?rid=" + runId);
+			get = new HttpGet("/soj/judge_message.action?id=" + runId);
 			response = client.execute(host, get);
 			entity = response.getEntity();
-			html = EntityUtils.toString(entity, Charset.forName("gb2312"));
+			html = EntityUtils.toString(entity);
 		} finally {
 			EntityUtils.consume(entity);
 		}
@@ -248,10 +246,7 @@ public class HDUSubmitter extends Submitter {
 
 		try {
 			getMaxRunId();
-			if (!isLoggedIn()) {
-				login(usernameList[idx], passwordList[idx]);
-			}
-			submit();
+			submit(usernameList[idx], passwordList[idx]);
 			errorCode = 2;
 			submission.setStatus("Running & Judging");
 			baseService.addOrModify(submission);
@@ -266,12 +261,157 @@ public class HDUSubmitter extends Submitter {
 	@Override
 	public void waitForUnfreeze() {
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}	//HDU限制每两次提交之间至少隔3秒
+		}	//SCU限制每两次提交之间至少隔3秒
 		synchronized (using) {
 			using[idx] = false;
 		}
 	}
+}
+
+
+class SCUCaptchaRecognizer {
+	
+	public static String recognize(BufferedImage img) {
+		StringBuilder ans = new StringBuilder();
+		for (int i = 0; i < 4; i++) {
+			int minDiff = 999999;
+			char digitAns = 0;
+			for (int j = 0; j <= 9; j++) {
+				int curDiff = 0;
+				for (int y = 0; y < 9; y++) {
+					for (int x = 0; x < 6; x++) {
+						boolean pixel1 = digits[j][y].charAt(x) == '#';
+						boolean pixel2 = img.getRGB(left[i] + x, 1 + y) < -1e7;
+						if (pixel1 != pixel2) {
+							++curDiff;
+						}
+					}
+				}
+				if (curDiff < minDiff) {
+					minDiff = curDiff;
+					digitAns = (char) ('0' + j);
+				}
+			}
+			ans.append(digitAns);
+		}
+		return ans.toString();
+	}
+	
+	private static int left[] = new int[]{4, 12, 20, 28};
+	
+	private static String[][] digits = new String[][]{
+			{
+				"  ##  ",
+				" #  # ",
+				"#    #",
+				"#    #",
+				"#    #",
+				"#    #",
+				"#    #",
+				" #  # ",
+				"  ##  "
+			},
+			{
+			    "  ##  ",
+			    " # #  ",
+			    "   #  ",
+			    "   #  ",
+			    "   #  ",
+			    "   #  ",
+			    "   #  ",
+			    "   #  ",
+			    " #####"
+			},
+			{
+			    "####  ",
+			    "    # ",
+			    "    # ",
+			    "    # ",
+			    "   #  ",
+			    "  #   ",
+			    " #    ",
+			    "#     ",
+			    "##### "
+			},
+			{
+			    "####  ",
+			    "    # ",
+			    "    # ",
+			    "   #  ",
+			    " ##   ",
+			    "   #  ",
+			    "    # ",
+			    "    # ",
+			    "####  "
+			},
+			{
+				"    # ",
+				"   ## ",
+				"  # # ",
+				" #  # ",
+				"#   # ",
+				"######",
+				"    # ",
+				"    # ",
+				"    # "
+			},
+			{
+			    "##### ",
+			    "#     ",
+			    "#     ",
+			    "###   ",
+			    "   #  ",
+			    "    # ",
+			    "    # ",
+			    "   #  ",
+			    "###   "
+			},
+			{
+				"  ####",
+				" #    ",
+				"#     ",
+				"# ##  ",
+				"##  # ",
+				"#    #",
+				"#    #",
+				" #  # ",
+				"  ##  "		
+			},
+			{
+				"######",
+				"     #",
+				"    # ",
+				"   #  ",
+				"   #  ",
+				"  #   ",
+				"  #   ",
+				" #    ",
+				" #    "
+			},
+			{
+				" #### ",
+				"#    #",
+				"#    #",
+				" #  # ",
+				" #### ",
+				"#    #",
+				"#    #",
+				"#    #",
+				" #### "   
+			},
+			{
+			    "  ##  ",
+			    " #  # ",
+			    "#    #",
+			    "#    #",
+			    " #  ##",
+			    "  ## #",
+			    "     #",
+			    "    # ",
+			    "####  "
+			}
+		};
 }
