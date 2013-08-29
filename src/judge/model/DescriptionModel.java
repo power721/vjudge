@@ -1,14 +1,14 @@
 package judge.model;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 public class DescriptionModel extends BaseModel<DescriptionModel>
 {
 	private static final long serialVersionUID = -376409847087991812L;
 
 	private ProblemModel problem;
-	private Set<CproblemModel> cproblems;
+	private List<CproblemModel> cproblems;
 
 	public static final DescriptionModel dao = new DescriptionModel();
 
@@ -173,12 +173,12 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 	}
 
 	// @JSON(deserialize=false,serialize=false)
-	public Set<CproblemModel> getCproblems()
+	public List<CproblemModel> getCproblems()
 	{
 		return cproblems;
 	}
 
-	public void setCproblems(Set<CproblemModel> cproblems)
+	public void setCproblems(List<CproblemModel> cproblems)
 	{
 		this.cproblems = cproblems;
 	}

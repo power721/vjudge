@@ -5,7 +5,6 @@ import java.util.Date;
 import com.jfinal.plugin.activerecord.Page;
 
 import judge.action.BaseController;
-import judge.model.BaseModel;
 import judge.model.DescriptionModel;
 import judge.model.ProblemModel;
 import judge.service.BaseService;
@@ -16,7 +15,6 @@ public class SpiderTest extends BaseController
 {
 	static public IBaseService baseService = BaseService.baseService;
 
-	@SuppressWarnings("rawtypes")
 	public void result()
 	{
 		int pageNumber = 1;
@@ -26,7 +24,7 @@ public class SpiderTest extends BaseController
 			pageNumber = Integer.parseInt(getCookie("pageNumber", "1"));
 		int pageSize = getParaToInt("s", 20);
 
-		Page<BaseModel> problemList = ProblemModel.dao.paginate(pageNumber, pageSize, "SELECT *", "FROM t_problem");
+		Page<ProblemModel> problemList = ProblemModel.dao.paginate(pageNumber, pageSize, "SELECT *", "FROM t_problem");
 		setAttr("problemList", problemList);
 
 		render("spider_result.html");

@@ -3,15 +3,14 @@ package judge.model;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class ProblemModel extends BaseModel<ProblemModel>
 {
 	private static final long serialVersionUID = -7026460598310425085L;
 
-	private Set<DescriptionModel> descriptions;
-	private Set<CproblemModel> cproblems;
-	private Set<SubmissionModel> submissions;
+	private List<DescriptionModel> descriptions;
+	private List<CproblemModel> cproblems;
+	private List<SubmissionModel> submissions;
 
 	public static final ProblemModel dao = new ProblemModel();
 
@@ -27,16 +26,16 @@ public class ProblemModel extends BaseModel<ProblemModel>
 		}
 
 		setId(problemModel.getId());
+		getLog().debug("Update problem(" + getId() + "): " + getOriginOJ() + "-" + getOriginProb());
 		return update();
 	}
 
-	@SuppressWarnings("rawtypes")
 	public boolean deleteModel()
 	{
-		List<BaseModel> descriptions = DescriptionModel.dao.find("SELECT * FROM t_description WHERE C_PROBLEM_ID=?", getId());
+		List<DescriptionModel> descriptions = DescriptionModel.dao.find("SELECT * FROM t_description WHERE C_PROBLEM_ID=?", getId());
 		if(descriptions != null)
 		{
-			Iterator<BaseModel> iterator = descriptions.iterator();
+			Iterator<DescriptionModel> iterator = descriptions.iterator();
 			DescriptionModel description;
 			while (iterator.hasNext())
 			{
@@ -148,32 +147,32 @@ public class ProblemModel extends BaseModel<ProblemModel>
 		set("C_TRIGGER_TIME", triggerTime);
 	}
 
-	public Set<DescriptionModel> getDescriptions()
+	public List<DescriptionModel> getDescriptions()
 	{
 		return descriptions;
 	}
 
-	public void setDescriptions(Set<DescriptionModel> descriptions)
+	public void setDescriptions(List<DescriptionModel> descriptions)
 	{
 		this.descriptions = descriptions;
 	}
 
-	public Set<CproblemModel> getCproblems()
+	public List<CproblemModel> getCproblems()
 	{
 		return cproblems;
 	}
 
-	public void setCproblems(Set<CproblemModel> cproblems)
+	public void setCproblems(List<CproblemModel> cproblems)
 	{
 		this.cproblems = cproblems;
 	}
 
-	public Set<SubmissionModel> getSubmissions()
+	public List<SubmissionModel> getSubmissions()
 	{
 		return submissions;
 	}
 
-	public void setSubmissions(Set<SubmissionModel> submissions)
+	public void setSubmissions(List<SubmissionModel> submissions)
 	{
 		this.submissions = submissions;
 	}
