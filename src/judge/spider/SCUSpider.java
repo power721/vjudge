@@ -9,7 +9,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
@@ -24,8 +23,8 @@ public class SCUSpider extends Spider {
 		HttpEntity entity = null;
 		String html;
 
-		HttpHost proxy = new HttpHost("127.0.0.1", 8087);
-		client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		//HttpHost proxy = new HttpHost("127.0.0.1", 8087);
+		//client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 
 		if (problem.getOriginProb().trim().startsWith("0")) {
 			throw new RuntimeException();
