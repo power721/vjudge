@@ -226,6 +226,5 @@ public class SpiderTest extends BaseController
 		spider.start();
 
 		getLog().info("Sipder crawling " + OJ + "-" + pid + "……");
-		renderText("Sipder crawling " + OJ + "-" + pid + "……");
 	}
 }
