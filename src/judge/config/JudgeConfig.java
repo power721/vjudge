@@ -4,6 +4,7 @@ import judge.action.MainController;
 import judge.model.DescriptionModel;
 import judge.model.ProblemModel;
 import judge.test.SpiderTest;
+import judge.tool.ApplicationContainer;
 
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
@@ -71,7 +72,7 @@ public class JudgeConfig extends JFinalConfig
 	@Override
 	public void afterJFinalStart()
 	{
-
+		ApplicationContainer.sc = JFinal.me().getServletContext();
 	}
 
 	/**
