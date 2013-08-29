@@ -34,7 +34,7 @@ public class JudgeConfig extends JFinalConfig
 	{
 		// TODO Auto-generated method stub
 		me.add("/", MainController.class);
-		me.add("/spider", SpiderTest.class);
+		me.add("/spider", SpiderTest.class, "test");
 	}
 
 	@Override

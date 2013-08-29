@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Spider Test Result</title>
+</head>
+<body>
+
+    <script language="javascript" type="text/javascript">
+    $(document).ready(function(){
+        document.onkeydown=nextpage
+        document.onkeydown=nextpage
+        var prevpage="/spider/result/?p=${problemList.pageNumber-1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>"
+        var nextpage="/spider/result//?p=${problemList.pageNumber+1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>"
+        function nextpage(event)
+        {
+            event=event?event:(window.event?window.event:null);
+            <#if problemList.pageNumber&gt;1>if(event.keyCode==37)location=prevpage;</#if>
+            <#if problemList.pageNumber<problemList.totalPage>if(event.keyCode==39)location=nextpage;</#if>
+        }
+        });
+    </script>
+
+    <div class="pagination pagination-centered">
+        <div class="pull-left">
+        </div>
+        <ul>
+        <li class="<#if problemList.pageNumber==1>disabled</#if>"><a href="/spider/result/?p=1<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">&lt;&lt;</a></li>
+        <#if problemList.pageNumber&gt;1><li><a href="/spider/result/?p=${problemList.pageNumber-1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">Prev</a></li></#if>
+        <#if problemList??>
+        <#assign start=problemList.pageNumber-4>
+        <#assign end=problemList.pageNumber+4>
+        <#if start<1><#assign end=end-start+1><#assign start=1></#if>
+        <#if end&gt;problemList.totalPage ><#assign start=start-(end-problemList.totalPage)-1><#if start<1><#assign start=1></#if><#assign end=problemList.totalPage></#if>
+        <#if end<start><#assign end=start></#if>
+            <#list start..end as x>
+            <li class="<#if x==problemList.pageNumber>active</#if>"><a href="/spider/result/?p=${x}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">${x}</a></li>
+            </#list>
+        </#if>
+        <#if problemList.pageNumber<problemList.totalPage><li><a href="/spider/result/?p=${problemList.pageNumber+1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">Next</a></li></#if>
+        <li class="<#if problemList.pageNumber&gt;=problemList.totalPage>disabled</#if>"><a href="/spider/result/?p=${problemList.totalPage}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">&gt;&gt;</a></li>
+        </ul>
+        <div class="pull-right">
+            <span class="badge badge-info">${problemList.pageNumber}/${problemList.totalPage} Pages</span>
+            <span class="badge badge-info">${problemList.totalRow} Problems</span>
+        </div>
+    </div>
+    
+    <table id="problem-list" class="table table-hover table-condensed">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>OJ</th>
+            <th>PID</th>
+            <th>Source</th>
+            <th>Memory Limit</th>
+            <th>Time Limit</th>
+            <th>Date Time</th>
+          </tr>
+        </thead>
+        <tbody>
+        <#if problemList??>
+        <#list problemList.list as Problem>
+        <tr>
+            <td>${Problem.C_ID!}</td>
+            <td>${Problem.C_TITLE!}</td>
+            <td>${Problem.C_originOJ!}</td>
+            <td>${Problem.C_originProb!}</td>
+            <td>${Problem.C_SOURCE!}</td>
+            <td>${Problem.C_MEMORYLIMIT!}</td>
+            <td>${Problem.C_TIMELIMIT!}</td>
+            <td>${Problem.C_TRIGGER_TIME!}</td>
+        </tr>
+        </#list>
+        </#if>
+        </tbody>
+    </table>
+
+</body>
+</html>
