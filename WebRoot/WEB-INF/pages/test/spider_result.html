@@ -14,8 +14,8 @@
     $(document).ready(function(){
         document.onkeydown=nextpage
         document.onkeydown=nextpage
-        var prevpage="/spider/result/?p=${problemList.pageNumber-1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>"
-        var nextpage="/spider/result//?p=${problemList.pageNumber+1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>"
+        var prevpage="/spider/result/?p=${problemList.pageNumber-1}<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>"
+        var nextpage="/spider/result//?p=${problemList.pageNumber+1}<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>"
         function nextpage(event)
         {
             event=event?event:(window.event?window.event:null);
@@ -33,8 +33,8 @@
         <div class="pull-left">
         </div>
         <ul>
-        <li class="<#if problemList.pageNumber==1>disabled</#if>"><a href="/spider/result/?p=1<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">&lt;&lt;</a></li>
-        <#if problemList.pageNumber&gt;1><li><a href="/spider/result/?p=${problemList.pageNumber-1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">Prev</a></li></#if>
+        <li class="<#if problemList.pageNumber==1>disabled</#if>"><a href="/spider/result/?p=1<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>">&lt;&lt;</a></li>
+        <#if problemList.pageNumber&gt;1><li><a href="/spider/result/?p=${problemList.pageNumber-1}<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>">Prev</a></li></#if>
         <#if problemList??>
         <#assign start=problemList.pageNumber-4>
         <#assign end=problemList.pageNumber+4>
@@ -42,11 +42,11 @@
         <#if end&gt;problemList.totalPage ><#assign start=start-(end-problemList.totalPage)-1><#if start<1><#assign start=1></#if><#assign end=problemList.totalPage></#if>
         <#if end<start><#assign end=start></#if>
             <#list start..end as x>
-            <li class="<#if x==problemList.pageNumber>active</#if>"><a href="/spider/result/?p=${x}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">${x}</a></li>
+            <li class="<#if x==problemList.pageNumber>active</#if>"><a href="/spider/result/?p=${x}<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>">${x}</a></li>
             </#list>
         </#if>
-        <#if problemList.pageNumber<problemList.totalPage><li><a href="/spider/result/?p=${problemList.pageNumber+1}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">Next</a></li></#if>
-        <li class="<#if problemList.pageNumber&gt;=problemList.totalPage>disabled</#if>"><a href="/spider/result/?p=${problemList.totalPage}<#if problemList.pageSize!=50>&s=${problemList.pageSize}</#if>">&gt;&gt;</a></li>
+        <#if problemList.pageNumber<problemList.totalPage><li><a href="/spider/result/?p=${problemList.pageNumber+1}<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>">Next</a></li></#if>
+        <li class="<#if problemList.pageNumber&gt;=problemList.totalPage>disabled</#if>"><a href="/spider/result/?p=${problemList.totalPage}<#if problemList.pageSize!=20>&s=${problemList.pageSize}</#if>">&gt;&gt;</a></li>
         </ul>
         <div class="pull-right">
             <span class="badge badge-info">${problemList.pageNumber}/${problemList.totalPage} Pages</span>

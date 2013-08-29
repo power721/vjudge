@@ -16,6 +16,7 @@ public class SpiderTest extends BaseController
 {
 	static public IBaseService baseService = BaseService.baseService;
 
+	@SuppressWarnings("rawtypes")
 	public void result()
 	{
 		int pageNumber = 1;
@@ -23,58 +24,58 @@ public class SpiderTest extends BaseController
 			pageNumber = getParaToInt("p", 1);
 		else
 			pageNumber = Integer.parseInt(getCookie("pageNumber", "1"));
-		int pageSize = getParaToInt("s", 50);
+		int pageSize = getParaToInt("s", 20);
 
 		Page<BaseModel> problemList = ProblemModel.dao.paginate(pageNumber, pageSize, "SELECT *", "FROM t_problem");
 		setAttr("problemList", problemList);
-		
+
 		render("spider_result.html");
 	}
 
 	public void all()
 	{
-		run("Aizu", new AizuSpider());
+		run("Aizu", AizuSpider.class);
 
 		run("CodeForces", "10A", new CodeForcesSpider());
 
-		run("CSU", new CSUSpider());
+		run("CSU", CSUSpider.class);
 
-		run("FZU", new FZUSpider());
+		run("FZU", FZUSpider.class);
 
-		run("HDU", new HDUSpider());
+		run("HDU", HDUSpider.class);
 
-		run("HUST", new HUSTSpider());
+		run("HUST", HUSTSpider.class);
 
-		run("HYSBZ", new HYSBZSpider());
+		run("HYSBZ", HYSBZSpider.class);
 
-		run("LightOJ", new LightOJSpider());
+		run("LightOJ", LightOJSpider.class);
 
-		run("NBUT", new NBUTSpider());
+		run("NBUT", NBUTSpider.class);
 
-		run("POJ", new POJSpider());
+		run("POJ", POJSpider.class);
 
-		run("SCU", new SCUSpider());
+		run("SCU", SCUSpider.class);
 
 		run("SGU", "100", new SGUSpider());
 
 		run("SPOJ", "ABA12B", new SPOJSpider());
 
-		run("UESTC", new UESTCSpider());
+		run("UESTC", UESTCSpider.class);
 
-		run("URAL", new URALSpider());
+		run("URAL", URALSpider.class);
 
 		run("UVALive", "2000", new UVALiveSpider());
 
 		run("UVA", "10000", new UVASpider());
 
-		run("ZOJ", new ZOJSpider());
+		run("ZOJ", ZOJSpider.class);
 
-		run("ZTrening", new ZTreningSpider());
+		run("ZTrening", ZTreningSpider.class);
 	}
 
 	public void aizu()
 	{
-		run("Aizu", new AizuSpider());
+		run("Aizu", AizuSpider.class);
 	}
 
 	public void codeForces()
@@ -84,47 +85,47 @@ public class SpiderTest extends BaseController
 
 	public void csu()
 	{
-		run("CSU", new CSUSpider());
+		run("CSU", CSUSpider.class);
 	}
 
 	public void fzu()
 	{
-		run("FZU", new FZUSpider());
+		run("FZU", FZUSpider.class);
 	}
 
 	public void hdu()
 	{
-		run("HDU", new HDUSpider());
+		run("HDU", HDUSpider.class);
 	}
 
 	public void hust()
 	{
-		run("HUST", new HUSTSpider());
+		run("HUST", HUSTSpider.class);
 	}
 
 	public void hysbz()
 	{
-		run("HYSBZ", new HYSBZSpider());
+		run("HYSBZ", HYSBZSpider.class);
 	}
 
 	public void light()
 	{
-		run("LightOJ", new LightOJSpider());
+		run("LightOJ", LightOJSpider.class);
 	}
 
 	public void nbut()
 	{
-		run("NBUT", new NBUTSpider());
+		run("NBUT", NBUTSpider.class);
 	}
 
 	public void poj()
 	{
-		run("POJ", new POJSpider());
+		run("POJ", POJSpider.class);
 	}
 
 	public void scu()
 	{
-		run("SCU", new SCUSpider());
+		run("SCU", SCUSpider.class);
 	}
 
 	public void sgu()
@@ -139,12 +140,12 @@ public class SpiderTest extends BaseController
 
 	public void uestc()
 	{
-		run("UESTC", new UESTCSpider());
+		run("UESTC", UESTCSpider.class);
 	}
 
 	public void ural()
 	{
-		run("URAL", new URALSpider());
+		run("URAL", URALSpider.class);
 	}
 
 	public void uvaLive()
@@ -159,20 +160,45 @@ public class SpiderTest extends BaseController
 
 	public void zoj()
 	{
-		run("ZOJ", new ZOJSpider());
+		run("ZOJ", ZOJSpider.class);
 	}
 
 	public void zTrening()
 	{
-		run("ZTrening", new ZTreningSpider());
+		run("ZTrening", ZTreningSpider.class);
 	}
 
-	private void run(String OJ, Spider spider)
+	private void run(String OJ, Class<? extends Spider> spider)
 	{
-		String pid = getPara(0);
-		if (pid == null || pid.equals(""))
-			pid = "1001";
-		run(OJ, pid, spider);
+		String pid1 = "1001";
+		if (!isParaBlank(0))
+			pid1 = getPara(0);
+		String pid2 = pid1;
+		if (!isParaBlank(1))
+			pid2 = getPara(1);
+		int l = Integer.parseInt(pid1), r = Integer.parseInt(pid2), tmp;
+		if (l > r)
+		{
+			tmp = l;
+			l = r;
+			r = tmp;
+		}
+		for (Integer a = l; a <= r; ++a)
+		{
+			try
+			{
+				run(OJ, a.toString(), spider.newInstance());
+			} catch (InstantiationException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		redirect("/spider/result");
 	}
 
 	private void run(String OJ, String pid, Spider spider)
