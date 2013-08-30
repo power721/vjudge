@@ -6,7 +6,7 @@ import com.jfinal.aop.Interceptor;
 import com.jfinal.core.ActionInvocation;
 import com.jfinal.core.Controller;
 
-public class GlobalInterceptor implements Interceptor
+public class BaseURLInterceptor implements Interceptor
 {
 
 	@Override

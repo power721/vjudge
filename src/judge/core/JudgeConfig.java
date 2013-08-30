@@ -1,7 +1,7 @@
 package judge.core;
 
 import judge.action.MainController;
-import judge.interceptor.GlobalInterceptor;
+import judge.interceptor.BaseURLInterceptor;
 import judge.model.*;
 import judge.test.SpiderTest;
 import judge.tool.ApplicationContainer;
@@ -63,7 +63,7 @@ public class JudgeConfig extends JFinalConfig
 	{
 		// TODO Auto-generated method stub
 		me.add(new SessionInViewInterceptor());
-		me.add(new GlobalInterceptor());
+		me.add(new BaseURLInterceptor());
 	}
 
 	@Override
