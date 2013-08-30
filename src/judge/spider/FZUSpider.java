@@ -7,11 +7,13 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
+public class FZUSpider extends Spider
+{
 
-public class FZUSpider extends Spider {
-
-	public void crawl() throws Exception{
-		if (!problem.getOriginProb().matches("[1-9]\\d+")) {
+	public void crawl() throws Exception
+	{
+		if (!problem.getOriginProb().matches("[1-9]\\d+"))
+		{
 			throw new Exception();
 		}
 
@@ -19,21 +21,25 @@ public class FZUSpider extends Spider {
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://acm.fzu.edu.cn/problem.php?pid=" + problem.getOriginProb());
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		try {
+		try
+		{
 			httpClient.executeMethod(getMethod);
 			html = Tools.getHtml(getMethod, null);
 			html = html.replaceAll("<div class=\"data\">([\\s\\S]*?)</div>", "<pre>$1</pre>");
 			html = HtmlHandleUtil.transformUrlToAbs(html, getMethod.getURI().toString());
-		} finally {
+		} finally
+		{
 			getMethod.releaseConnection();
 		}
 
-		if (html.contains("No Such Problem!")){
+		if (html.contains("No Such Problem!"))
+		{
 			throw new Exception();
 		}
 
 		problem.setTitle(Tools.regFind(html, "<b> Problem \\d+ (.+?)</b>").trim());
-		if (problem.getTitle().isEmpty()){
+		if (problem.getTitle().isEmpty())
+		{
 			throw new Exception();
 		}
 
@@ -46,7 +52,8 @@ public class FZUSpider extends Spider {
 		description.setSampleOutput(Tools.regFind(html, "Sample Output</h2>([\\s\\S]*?)(<h2><img|</div>\\s*<br />)") + "</pre>");
 		description.setHint(Tools.regFind(html, "Hint</h2>([\\s\\S]+?)(<h2><img|</div>\\s*<br />)"));
 		problem.setSource(Tools.regFind(html, "Source</h2>([\\s\\S]+?)(<h2><img|</div>\\s*<br />)"));
-		if (problem.getSource().trim().isEmpty()) {
+		if (problem.getSource().trim().isEmpty())
+		{
 			problem.setSource(null);
 		}
 		problem.setUrl("http://acm.fzu.edu.cn/problem.php?pid=" + problem.getOriginProb());

@@ -7,29 +7,34 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
+public class HUSTSpider extends Spider
+{
 
-public class HUSTSpider extends Spider {
-
-	public void crawl() throws Exception{
+	public void crawl() throws Exception
+	{
 
 		String html = "";
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://acm.hust.edu.cn/problem.php?id=" + problem.getOriginProb());
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		try {
+		try
+		{
 			int statusCode = httpClient.executeMethod(getMethod);
-			if(statusCode != HttpStatus.SC_OK) {
-				System.err.println("Method failed: "+getMethod.getStatusLine());
+			if (statusCode != HttpStatus.SC_OK)
+			{
+				System.err.println("Method failed: " + getMethod.getStatusLine());
 			}
 			html = Tools.getHtml(getMethod, null);
 			html = HtmlHandleUtil.transformUrlToAbs(html, getMethod.getURI().toString());
-		} catch(Exception e) {
+		} catch (Exception e)
+		{
 			getMethod.releaseConnection();
 			throw new Exception();
 		}
 
 		problem.setTitle(Tools.regFind(html, "<title>[\\s\\S]*?-- ([\\s\\S]*?)</title>").trim());
-		if (problem.getTitle().isEmpty()){
+		if (problem.getTitle().isEmpty())
+		{
 			throw new Exception();
 		}
 

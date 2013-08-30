@@ -13,27 +13,34 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
-public class UVaSpiderInitializer extends Thread {
+public class UVaSpiderInitializer extends Thread
+{
 
 	public static int threadCnt = 0;
 	private static ConcurrentHashMap<String, Long> map = new ConcurrentHashMap<String, Long>();
 	private String rootUrl;
 
-	public UVaSpiderInitializer(String url) {
-		if (UVASpider.problemNumberMap == null) {
+	public UVaSpiderInitializer(String url)
+	{
+		if (UVASpider.problemNumberMap == null)
+		{
 			UVASpider.problemNumberMap = new String[20000];
 		}
 		rootUrl = url;
 	}
 
-	public void run() {
+	public void run()
+	{
 		Long lastTime = map.get(rootUrl);
-		if (lastTime == null) {
+		if (lastTime == null)
+		{
 			lastTime = 0L;
 		}
-		if (new Date().getTime() - lastTime > 300000L) {
+		if (new Date().getTime() - lastTime > 300000L)
+		{
 			map.put(rootUrl, new Date().getTime());
-		} else {
+		} else
+		{
 			return;
 		}
 		++threadCnt;
@@ -43,9 +50,11 @@ public class UVaSpiderInitializer extends Thread {
 		HttpClient httpClient = new HttpClient();
 		httpClient.getHostConfiguration().setProxy("127.0.0.1", 8087);
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(30, true));
-		try {
+		try
+		{
 			int statusCode = httpClient.executeMethod(getMethod);
-			if (statusCode != HttpStatus.SC_OK) {
+			if (statusCode != HttpStatus.SC_OK)
+			{
 				System.err.println("Method failed: " + getMethod.getStatusLine());
 				throw new Exception();
 			}
@@ -53,18 +62,22 @@ public class UVaSpiderInitializer extends Thread {
 			html = html.substring(html.indexOf("Total Users / Solving"));
 
 			Matcher matcher = Pattern.compile("category=(\\d+)\">").matcher(html);
-			while (matcher.find()) {
+			while (matcher.find())
+			{
 				new UVaSpiderInitializer("http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=" + matcher.group(1)).start();
 			}
 
 			matcher = Pattern.compile("page=show_problem&amp;problem=(\\d+)\">(\\d+)").matcher(html);
-			while (matcher.find()) {
-				System.out.println(matcher.group(2) + "->" +  matcher.group(1));
+			while (matcher.find())
+			{
+				System.out.println(matcher.group(2) + "->" + matcher.group(1));
 				UVASpider.problemNumberMap[Integer.parseInt(matcher.group(2))] = matcher.group(1);
 			}
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
-		} finally {
+		} finally
+		{
 			getMethod.releaseConnection();
 			--threadCnt;
 		}

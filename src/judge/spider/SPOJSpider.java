@@ -7,34 +7,40 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
+public class SPOJSpider extends Spider
+{
 
-public class SPOJSpider extends Spider {
-
-	public void crawl() throws Exception{
+	public void crawl() throws Exception
+	{
 
 		String html = "";
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://www.spoj.pl/problems/" + problem.getOriginProb());
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		try {
+		try
+		{
 			int statusCode = httpClient.executeMethod(getMethod);
-			if(statusCode != HttpStatus.SC_OK) {
-				System.err.println("Method failed: "+getMethod.getStatusLine());
+			if (statusCode != HttpStatus.SC_OK)
+			{
+				System.err.println("Method failed: " + getMethod.getStatusLine());
 			}
 			html = Tools.getHtml(getMethod, null);
 			html = HtmlHandleUtil.transformUrlToAbs(html, getMethod.getURI().toString());
-		} catch(Exception e) {
+		} catch (Exception e)
+		{
 			getMethod.releaseConnection();
 			throw new Exception();
 		}
 
-		if (html.contains("Wrong problem code!") || !html.contains("<h2>SPOJ Problem Set (classical)</h2>") && !html.contains("<h2>SPOJ Problem Set (tutorial)</h2>")){
+		if (html.contains("Wrong problem code!") || !html.contains("<h2>SPOJ Problem Set (classical)</h2>")
+				&& !html.contains("<h2>SPOJ Problem Set (tutorial)</h2>"))
+		{
 			throw new Exception();
 		}
 
-
 		problem.setTitle(Tools.regFind(html, "<h1>\\d+\\.([\\s\\S]*?)</h1>").trim());
-		if (problem.getTitle().isEmpty()){
+		if (problem.getTitle().isEmpty())
+		{
 			throw new Exception();
 		}
 		Double timeLimit = 1000 * Double.parseDouble(Tools.regFind(html, "Time limit:</td><td>([\\s\\S]*?)s"));

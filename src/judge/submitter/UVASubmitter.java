@@ -31,8 +31,8 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 
-
-public class UVASubmitter extends Submitter {
+public class UVASubmitter extends Submitter
+{
 
 	static final String OJ_NAME = "UVA";
 	static private DefaultHttpClient clientList[];
@@ -43,21 +43,26 @@ public class UVASubmitter extends Submitter {
 	private DefaultHttpClient httpClient;
 	private HttpEntity entity;
 
-	static {
+	static
+	{
 		List<String> uList = new ArrayList<String>(), pList = new ArrayList<String>();
-		try {
+		try
+		{
 			FileReader fr = new FileReader(ApplicationContainer.sc.getRealPath("WEB-INF/classes/accounts.conf"));
 			BufferedReader br = new BufferedReader(fr);
-			while (br.ready()) {
+			while (br.ready())
+			{
 				String info[] = br.readLine().split("\\s+");
-				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME)){
+				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME))
+				{
 					uList.add(info[1]);
 					pList.add(info[2]);
 				}
 			}
 			br.close();
 			fr.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		usernameList = uList.toArray(new String[0]);
@@ -65,9 +70,11 @@ public class UVASubmitter extends Submitter {
 		using = new boolean[usernameList.length];
 		clientList = new DefaultHttpClient[usernameList.length];
 		HttpHost proxy = new HttpHost("127.0.0.1", 8087);
-		for (int i = 0; i < clientList.length; i++){
+		for (int i = 0; i < clientList.length; i++)
+		{
 			clientList[i] = new DefaultHttpClient();
-			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
+			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+					"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
 			clientList[i].getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -81,7 +88,8 @@ public class UVASubmitter extends Submitter {
 		sc.setAttribute("UVA", languageList);
 	}
 
-	private void submit() throws Exception{
+	private void submit() throws Exception
+	{
 		HttpPost httpPost = new HttpPost("http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=25&page=save_submission");
 
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -95,52 +103,63 @@ public class UVASubmitter extends Submitter {
 
 		System.out.println("submit...");
 
-		try {
+		try
+		{
 			HttpResponse response = httpClient.execute(httpPost);
 			entity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
 
-			if (statusCode != HttpStatus.SC_MOVED_PERMANENTLY){
+			if (statusCode != HttpStatus.SC_MOVED_PERMANENTLY)
+			{
 				throw new RuntimeException();
 			}
 			String headerLocation = response.getFirstHeader("Location").getValue();
 			String submissionId = Tools.regFind(headerLocation, "with\\+ID\\+(\\d+)");
-			if (submissionId.isEmpty()) {
+			if (submissionId.isEmpty())
+			{
 				throw new Exception();
 			}
 			submission.setRealRunId(submissionId);
 			baseService.addOrModify(submission);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
 
-	private void ensureLoggedIn(String username, String password) throws Exception{
+	private void ensureLoggedIn(String username, String password) throws Exception
+	{
 		String indexContent = "";
-		try {
+		try
+		{
 			HttpGet httpGet = new HttpGet("http://uva.onlinejudge.org/index.php");
 			HttpResponse response = httpClient.execute(httpGet);
 			entity = response.getEntity();
 			indexContent = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 
-		if (indexContent.contains("mod_login_logoutform")) {
+		if (indexContent.contains("mod_login_logoutform"))
+		{
 			return;
 		}
 
-		try {
+		try
+		{
 			HttpPost httpost = new HttpPost("http://uva.onlinejudge.org/index.php?option=com_comprofiler&task=login");
 
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			String reg = "<input type=\"hidden\" name=\"([\\s\\S]*?)\" value=\"([\\s\\S]*?)\" />";
 			Matcher matcher = Pattern.compile(reg).matcher(indexContent);
 			int number = 0;
-			while (matcher.find()){
+			while (matcher.find())
+			{
 				String name = matcher.group(1);
 				String value = matcher.group(2);
-				if (number > 0 && number < 9) {
+				if (number > 0 && number < 9)
+				{
 					nvps.add(new BasicNameValuePair(name, value));
 				}
 				++number;
@@ -153,38 +172,50 @@ public class UVASubmitter extends Submitter {
 
 			HttpResponse response = httpClient.execute(httpost);
 			entity = response.getEntity();
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
 
-	public void getResult(String username) throws Exception{
-		String reg = "<td>" + submission.getRealRunId() + "</td>[\\s\\S]*?</td>[\\s\\S]*?</td>[\\s\\S]*?<td>([\\s\\S]*?)</td>[\\s\\S]*?</td>[\\s\\S]*?<td>([\\s\\S]*?)</td>", result;
+	public void getResult(String username) throws Exception
+	{
+		String reg = "<td>" + submission.getRealRunId()
+				+ "</td>[\\s\\S]*?</td>[\\s\\S]*?</td>[\\s\\S]*?<td>([\\s\\S]*?)</td>[\\s\\S]*?</td>[\\s\\S]*?<td>([\\s\\S]*?)</td>", result;
 		Pattern p = Pattern.compile(reg);
 
 		HttpGet get = new HttpGet("http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=9");
 		long cur = new Date().getTime(), interval = 2000;
-		while (new Date().getTime() - cur < 600000){
+		while (new Date().getTime() - cur < 600000)
+		{
 			String tLine = null;
-			try {
+			try
+			{
 				HttpResponse rsp = httpClient.execute(get);
 				entity = rsp.getEntity();
 				tLine = EntityUtils.toString(entity);
-			} finally {
+			} finally
+			{
 				EntityUtils.consume(entity);
 			}
 
 			Matcher m = p.matcher(tLine);
-			if (m.find()) {
-				result = m.group(1).replaceAll("<[\\s\\S]*?>", "").trim().replaceAll("judge", "judging").replaceAll("queue", "queueing").replaceAll("Received", "processing");
-				if (result.isEmpty()) {
+			if (m.find())
+			{
+				result = m.group(1).replaceAll("<[\\s\\S]*?>", "").trim().replaceAll("judge", "judging").replaceAll("queue", "queueing")
+						.replaceAll("Received", "processing");
+				if (result.isEmpty())
+				{
 					result = "processing";
 				}
 				submission.setStatus(result);
-				if (!result.contains("ing")){
-					if (result.equals("Accepted")){
+				if (!result.contains("ing"))
+				{
+					if (result.equals("Accepted"))
+					{
 						submission.setTime(Integer.parseInt(m.group(2).replaceAll("\\.", "")));
-					} else if (result.contains("Compilation error")) {
+					} else if (result.contains("Compilation error"))
+					{
 						getAdditionalInfo(submission.getRealRunId());
 					}
 					baseService.addOrModify(submission);
@@ -198,48 +229,60 @@ public class UVASubmitter extends Submitter {
 		throw new Exception();
 	}
 
-	private void getAdditionalInfo(String runId) throws HttpException, IOException {
+	private void getAdditionalInfo(String runId) throws HttpException, IOException
+	{
 		HttpGet httpGet = new HttpGet("http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=9&page=show_compilationerror&submission=" + runId);
 
-		try {
+		try
+		{
 			HttpResponse rsp = httpClient.execute(httpGet);
 			entity = rsp.getEntity();
 			String additionalInfo = EntityUtils.toString(entity);
 			submission.setAdditionalInfo(Tools.regFind(additionalInfo, "Compilation error for submission " + runId + "</div>\\s*(<pre>[\\s\\S]*?</pre>)"));
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 
 	}
 
-	private int getIdleClient() {
+	private int getIdleClient()
+	{
 		int length = usernameList.length;
 		int begIdx = (int) (Math.random() * length);
 
-		while(true) {
-			synchronized (using) {
-				for (int i = begIdx, j; i < begIdx + length; i++) {
+		while (true)
+		{
+			synchronized (using)
+			{
+				for (int i = begIdx, j; i < begIdx + length; i++)
+				{
 					j = i % length;
-					if (!using[j]) {
+					if (!using[j])
+					{
 						using[j] = true;
 						httpClient = clientList[j];
 						return j;
 					}
 				}
 			}
-			try {
+			try
+			{
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void work() {
+	public void work()
+	{
 		idx = getIdleClient();
 		int errorCode = 1;
 
-		try {
+		try
+		{
 			ensureLoggedIn(usernameList[idx], passwordList[idx]);
 			submit();
 			errorCode = 2;
@@ -247,7 +290,8 @@ public class UVASubmitter extends Submitter {
 			baseService.addOrModify(submission);
 			Thread.sleep(2000);
 			getResult(usernameList[idx]);
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 			submission.setStatus("Judging Error " + errorCode);
 			baseService.addOrModify(submission);
@@ -255,13 +299,17 @@ public class UVASubmitter extends Submitter {
 	}
 
 	@Override
-	public void waitForUnfreeze() {
-		try {
+	public void waitForUnfreeze()
+	{
+		try
+		{
 			Thread.sleep(10000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			e.printStackTrace();
-		}	//UVa貌似不限制每两次提交之间的提交间隔
-		synchronized (using) {
+		} // UVa貌似不限制每两次提交之间的提交间隔
+		synchronized (using)
+		{
 			using[idx] = false;
 		}
 	}

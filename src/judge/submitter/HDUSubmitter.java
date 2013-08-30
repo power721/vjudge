@@ -33,7 +33,8 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 
-public class HDUSubmitter extends Submitter {
+public class HDUSubmitter extends Submitter
+{
 
 	static final String OJ_NAME = "HDU";
 	static private DefaultHttpClient clientList[];
@@ -49,21 +50,26 @@ public class HDUSubmitter extends Submitter {
 	private HttpHost host = new HttpHost("acm.hdu.edu.cn");
 	private String html;
 
-	static {
+	static
+	{
 		List<String> uList = new ArrayList<String>(), pList = new ArrayList<String>();
-		try {
+		try
+		{
 			FileReader fr = new FileReader(ApplicationContainer.sc.getRealPath("WEB-INF/classes/accounts.conf"));
 			BufferedReader br = new BufferedReader(fr);
-			while (br.ready()) {
+			while (br.ready())
+			{
 				String info[] = br.readLine().split("\\s+");
-				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME)){
+				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME))
+				{
 					uList.add(info[1]);
 					pList.add(info[2]);
 				}
 			}
 			br.close();
 			fr.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		usernameList = uList.toArray(new String[0]);
@@ -71,9 +77,11 @@ public class HDUSubmitter extends Submitter {
 		using = new boolean[usernameList.length];
 		clientList = new DefaultHttpClient[usernameList.length];
 		HttpHost proxy = new HttpHost("127.0.0.1", 8087);
-		for (int i = 0; i < clientList.length; i++){
+		for (int i = 0; i < clientList.length; i++)
+		{
 			clientList[i] = new DefaultHttpClient();
-			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
+			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+					"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
 			clientList[i].getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -89,116 +97,142 @@ public class HDUSubmitter extends Submitter {
 		sc.setAttribute("HDU", languageList);
 	}
 
-	private void getMaxRunId() throws ClientProtocolException, IOException {
+	private void getMaxRunId() throws ClientProtocolException, IOException
+	{
 		Pattern p = Pattern.compile("<td height=22px>(\\d+)");
 
-		try {
+		try
+		{
 			get = new HttpGet("/status.php");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 
 		Matcher m = p.matcher(html);
-		if (m.find()) {
+		if (m.find())
+		{
 			maxRunId = Integer.parseInt(m.group(1));
 			System.out.println("maxRunId : " + maxRunId);
-		} else {
+		} else
+		{
 			throw new RuntimeException();
 		}
 	}
-	
-	private void login(String username, String password) throws ClientProtocolException, IOException {
-		try {
+
+	private void login(String username, String password) throws ClientProtocolException, IOException
+	{
+		try
+		{
 			post = new HttpPost("/userloginex.php?action=login&cid=0&notice=0");
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("username", username));
 			nvps.add(new BasicNameValuePair("userpass", password));
-			
+
 			post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("gb2312")));
-			
+
 			response = client.execute(host, post);
 			entity = response.getEntity();
-			
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
+
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY)
+			{
 				throw new RuntimeException();
 			}
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
 
-	private boolean isLoggedIn() throws ClientProtocolException, IOException {
-		try {
+	private boolean isLoggedIn() throws ClientProtocolException, IOException
+	{
+		try
+		{
 			get = new HttpGet("/");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
-		if (html.contains("href=\"/userloginex.php?action=logout\"")) {
+		if (html.contains("href=\"/userloginex.php?action=logout\""))
+		{
 			return true;
-		} else {
+		} else
+		{
 			return false;
 		}
 	}
 
-	private void submit() throws ClientProtocolException, IOException {
+	private void submit() throws ClientProtocolException, IOException
+	{
 		Problem problem = (Problem) baseService.query(Problem.class, submission.getProblem().getId());
-		
-		try {
+
+		try
+		{
 			post = new HttpPost("/submit.php?action=submit");
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("check", "0"));
 			nvps.add(new BasicNameValuePair("language", submission.getLanguage()));
 			nvps.add(new BasicNameValuePair("problemid", problem.getOriginProb()));
 			nvps.add(new BasicNameValuePair("usercode", submission.getSource()));
-			
+
 			post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("gb2312")));
-			
+
 			response = client.execute(host, post);
 			entity = response.getEntity();
-			
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
+
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY)
+			{
 				throw new RuntimeException();
 			}
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
 
-	public void getResult(String username) throws Exception{
+	public void getResult(String username) throws Exception
+	{
 		Pattern p = Pattern.compile(">(\\d{7,})</td><td>[\\s\\S]*?</td><td>([\\s\\S]*?)</td><td>[\\s\\S]*?</td><td>(\\d*?)MS</td><td>(\\d*?)K</td>");
 
 		long cur = new Date().getTime(), interval = 2000;
-		while (new Date().getTime() - cur < 600000){
-			try {
+		while (new Date().getTime() - cur < 600000)
+		{
+			try
+			{
 				get = new HttpGet("/status.php?user=" + username);
 				response = client.execute(host, get);
 				entity = response.getEntity();
 				html = EntityUtils.toString(entity);
-			} finally {
+			} finally
+			{
 				EntityUtils.consume(entity);
 			}
 
 			Matcher m = p.matcher(html);
-			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId) {
+			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId)
+			{
 				String result = m.group(2).replaceAll("<[\\s\\S]*?>", "").trim();
 				submission.setStatus(result);
 				submission.setRealRunId(m.group(1));
-    			if (!result.contains("ing")){
-    				if (result.equals("Accepted")){
-	    				submission.setTime(Integer.parseInt(m.group(3)));
-	    				submission.setMemory(Integer.parseInt(m.group(4)));
-    				} else if (result.contains("Compilation")) {
+				if (!result.contains("ing"))
+				{
+					if (result.equals("Accepted"))
+					{
+						submission.setTime(Integer.parseInt(m.group(3)));
+						submission.setMemory(Integer.parseInt(m.group(4)));
+					} else if (result.contains("Compilation"))
+					{
 						getAdditionalInfo(submission.getRealRunId());
 					}
-    				baseService.addOrModify(submission);
-    				return;
-    			}
+					baseService.addOrModify(submission);
+					return;
+				}
 				baseService.addOrModify(submission);
 			}
 			Thread.sleep(interval);
@@ -207,48 +241,61 @@ public class HDUSubmitter extends Submitter {
 		throw new Exception();
 	}
 
-	private void getAdditionalInfo(String runId) throws HttpException, IOException {
-		try {
+	private void getAdditionalInfo(String runId) throws HttpException, IOException
+	{
+		try
+		{
 			get = new HttpGet("/viewerror.php?rid=" + runId);
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity, Charset.forName("gb2312"));
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 		submission.setAdditionalInfo(Tools.regFind(html, "(<pre>[\\s\\S]*?</pre>)"));
 	}
 
-	private int getIdleClient() {
+	private int getIdleClient()
+	{
 		int length = usernameList.length;
 		int begIdx = (int) (Math.random() * length);
 
-		while(true) {
-			synchronized (using) {
-				for (int i = begIdx, j; i < begIdx + length; i++) {
+		while (true)
+		{
+			synchronized (using)
+			{
+				for (int i = begIdx, j; i < begIdx + length; i++)
+				{
 					j = i % length;
-					if (!using[j]) {
+					if (!using[j])
+					{
 						using[j] = true;
 						client = clientList[j];
 						return j;
 					}
 				}
 			}
-			try {
+			try
+			{
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void work() {
+	public void work()
+	{
 		idx = getIdleClient();
 		int errorCode = 1;
 
-		try {
+		try
+		{
 			getMaxRunId();
-			if (!isLoggedIn()) {
+			if (!isLoggedIn())
+			{
 				login(usernameList[idx], passwordList[idx]);
 			}
 			submit();
@@ -256,7 +303,8 @@ public class HDUSubmitter extends Submitter {
 			submission.setStatus("Running & Judging");
 			baseService.addOrModify(submission);
 			getResult(usernameList[idx]);
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 			submission.setStatus("Judging Error " + errorCode);
 			baseService.addOrModify(submission);
@@ -264,13 +312,17 @@ public class HDUSubmitter extends Submitter {
 	}
 
 	@Override
-	public void waitForUnfreeze() {
-		try {
+	public void waitForUnfreeze()
+	{
+		try
+		{
 			Thread.sleep(5000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			e.printStackTrace();
-		}	//HDU限制每两次提交之间至少隔3秒
-		synchronized (using) {
+		} // HDU限制每两次提交之间至少隔3秒
+		synchronized (using)
+		{
 			using[idx] = false;
 		}
 	}

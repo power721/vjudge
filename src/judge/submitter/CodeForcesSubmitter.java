@@ -34,7 +34,8 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 
-public class CodeForcesSubmitter extends Submitter {
+public class CodeForcesSubmitter extends Submitter
+{
 
 	static final String OJ_NAME = "CodeForces";
 	static private DefaultHttpClient clientList[];
@@ -49,25 +50,30 @@ public class CodeForcesSubmitter extends Submitter {
 	private HttpEntity entity;
 	private HttpHost host = new HttpHost("codeforces.com");
 	private String html;
-	
+
 	private String tta;
 	private String csrfToken;
 
-	static {
+	static
+	{
 		List<String> uList = new ArrayList<String>(), pList = new ArrayList<String>();
-		try {
+		try
+		{
 			FileReader fr = new FileReader(ApplicationContainer.sc.getRealPath("WEB-INF/classes/accounts.conf"));
 			BufferedReader br = new BufferedReader(fr);
-			while (br.ready()) {
+			while (br.ready())
+			{
 				String info[] = br.readLine().split("\\s+");
-				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME)){
+				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME))
+				{
 					uList.add(info[1]);
 					pList.add(info[2]);
 				}
 			}
 			br.close();
 			fr.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		usernameList = uList.toArray(new String[0]);
@@ -75,9 +81,11 @@ public class CodeForcesSubmitter extends Submitter {
 		using = new boolean[usernameList.length];
 		clientList = new DefaultHttpClient[usernameList.length];
 		HttpHost proxy = new HttpHost("127.0.0.1", 8087);
-		for (int i = 0; i < clientList.length; i++){
+		for (int i = 0; i < clientList.length; i++)
+		{
 			clientList[i] = new DefaultHttpClient();
-			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
+			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+					"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
 			clientList[i].getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -107,29 +115,36 @@ public class CodeForcesSubmitter extends Submitter {
 		sc.setAttribute("CodeForces", languageList);
 	}
 
-	private void getMaxRunId() throws ClientProtocolException, IOException {
+	private void getMaxRunId() throws ClientProtocolException, IOException
+	{
 		Pattern p = Pattern.compile("submissionId=\"(\\d+)\"");
 
-		try {
+		try
+		{
 			get = new HttpGet("/problemset/status");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 
 		Matcher m = p.matcher(html);
-		if (m.find()) {
+		if (m.find())
+		{
 			maxRunId = Integer.parseInt(m.group(1));
-		} else {
+		} else
+		{
 			throw new RuntimeException();
 		}
 	}
-	
-	private void login(String username, String password) throws ClientProtocolException, IOException {
+
+	private void login(String username, String password) throws ClientProtocolException, IOException
+	{
 		getTokens();
-		try {
+		try
+		{
 			post = new HttpPost("/enter");
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("csrf_token", csrfToken));
@@ -140,53 +155,64 @@ public class CodeForcesSubmitter extends Submitter {
 			nvps.add(new BasicNameValuePair("remember", "on"));
 
 			post.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));
-			
+
 			response = client.execute(host, post);
 			entity = response.getEntity();
-			
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
+
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY)
+			{
 				throw new RuntimeException();
 			}
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
-	
+
 	/**
 	 * Currently, get the following tokens: _tta, csrf_token
+	 * 
 	 * @return
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	private void getTokens() throws ParseException, IOException {
-//		if (csrfToken != null && tta != null) {
-//			return;
-//		}
-		
-		try {
+	private void getTokens() throws ParseException, IOException
+	{
+		// if (csrfToken != null && tta != null) {
+		// return;
+		// }
+
+		try
+		{
 			get = new HttpGet("/");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
-		
+
 		csrfToken = Tools.regFind(html, "data-csrf='(\\w+)'");
-		
-		if (tta == null) {
+
+		if (tta == null)
+		{
 			String _39ce7 = null;
-			for (Cookie cookie : client.getCookieStore().getCookies()) {
-				if (cookie.getName().equals("39ce7")) {
+			for (Cookie cookie : client.getCookieStore().getCookies())
+			{
+				if (cookie.getName().equals("39ce7"))
+				{
 					_39ce7 = cookie.getValue();
 				}
 			}
-			if (_39ce7 == null) {
+			if (_39ce7 == null)
+			{
 				throw new RuntimeException();
 			}
-	
+
 			Integer _tta = 0;
-			for (int c = 0; c < _39ce7.length(); c++) {
+			for (int c = 0; c < _39ce7.length(); c++)
+			{
 				_tta = (_tta + (c + 1) * (c + 2) * _39ce7.charAt(c)) % 1009;
 				if (c % 3 == 0)
 					_tta++;
@@ -204,22 +230,27 @@ public class CodeForcesSubmitter extends Submitter {
 
 	}
 
-	private boolean isLoggedIn() throws ClientProtocolException, IOException {
-		try {
+	private boolean isLoggedIn() throws ClientProtocolException, IOException
+	{
+		try
+		{
 			get = new HttpGet("/");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 		return html.contains("/logout\">");
 	}
 
-	private void submit() throws Exception{
+	private void submit() throws Exception
+	{
 		String source = submission.getSource() + "\n";
 		int random = (int) (Math.random() * 87654321);
-		while (random > 0) {
+		while (random > 0)
+		{
 			source += random % 2 == 0 ? ' ' : '\t';
 			random /= 2;
 		}
@@ -238,58 +269,73 @@ public class CodeForcesSubmitter extends Submitter {
 		nvps.add(new BasicNameValuePair("doNotShowWarningAgain", "on"));
 		post.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));
 
-		try {
+		try
+		{
 			response = client.execute(host, post);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
 
-			if (html.contains("error for__programTypeId")) {
+			if (html.contains("error for__programTypeId"))
+			{
 				throw new RuntimeException("judge_exception:Language Error");
 			}
-			if (html.contains("error for__source")) {
+			if (html.contains("error for__source"))
+			{
 				throw new Exception("judge_exception:Source Code Error");
 			}
-			
+
 			int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode != HttpStatus.SC_MOVED_TEMPORARILY){
+			if (statusCode != HttpStatus.SC_MOVED_TEMPORARILY)
+			{
 				throw new Exception();
 			}
-			if (!response.getFirstHeader("Location").getValue().contains("status")) {
+			if (!response.getFirstHeader("Location").getValue().contains("status"))
+			{
 				throw new Exception();
 			}
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 
 	}
 
-	public void getResult(String username) throws Exception{
+	public void getResult(String username) throws Exception
+	{
 		Pattern p = Pattern.compile(username + "</a>\\s*</td>[\\s\\S]*?submissionId=\"(\\d+)\" >([\\s\\S]*?)</td>[\\s\\S]*?(\\d+)[\\s\\S]*?(\\d+)");
 
 		long cur = new Date().getTime(), interval = 2000;
-		while (new Date().getTime() - cur < 600000){
-			try {
+		while (new Date().getTime() - cur < 600000)
+		{
+			try
+			{
 				get = new HttpGet("/problemset/status");
 				response = client.execute(host, get);
 				entity = response.getEntity();
 				html = EntityUtils.toString(entity);
-			} finally {
+			} finally
+			{
 				EntityUtils.consume(entity);
 			}
 
 			Matcher m = p.matcher(html);
-			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId) {
+			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId)
+			{
 				String result = m.group(2).replaceAll("<[\\s\\S]*?>", "").trim().replaceAll("judge\\b", "judging").replaceAll("queue", "queueing");
-				if (result.isEmpty()) {
+				if (result.isEmpty())
+				{
 					result = "processing";
 				}
 				submission.setStatus(result);
 				submission.setRealRunId(m.group(1));
-				if (!result.contains("ing")){
-					if (result.equals("Accepted")){
+				if (!result.contains("ing"))
+				{
+					if (result.equals("Accepted"))
+					{
 						submission.setTime(Integer.parseInt(m.group(3)));
 						submission.setMemory(Integer.parseInt(m.group(4)));
-					} else if (result.contains("Compilation")) {
+					} else if (result.contains("Compilation"))
+					{
 						getAdditionalInfo(submission.getRealRunId());
 					}
 					baseService.addOrModify(submission);
@@ -303,7 +349,8 @@ public class CodeForcesSubmitter extends Submitter {
 		throw new Exception();
 	}
 
-	private void getAdditionalInfo(String runId) throws HttpException, IOException {
+	private void getAdditionalInfo(String runId) throws HttpException, IOException
+	{
 		post = new HttpPost("/data/judgeProtocol");
 
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -311,46 +358,58 @@ public class CodeForcesSubmitter extends Submitter {
 		nvps.add(new BasicNameValuePair("csrf_token", csrfToken));
 		post.setEntity(new UrlEncodedFormEntity(nvps, Consts.UTF_8));
 
-		try {
+		try
+		{
 			response = client.execute(host, post);
 			entity = response.getEntity();
 			String additionalInfo = EntityUtils.toString(entity);
 			submission.setAdditionalInfo("<pre>" + additionalInfo.replaceAll("(\\\\r)?\\\\n", "\n").replaceAll("\\\\\\\\", "\\\\") + "</pre>");
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
 
-	private int getIdleClient() {
+	private int getIdleClient()
+	{
 		int length = usernameList.length;
 		int begIdx = (int) (Math.random() * length);
 
-		while(true) {
-			synchronized (using) {
-				for (int i = begIdx, j; i < begIdx + length; i++) {
+		while (true)
+		{
+			synchronized (using)
+			{
+				for (int i = begIdx, j; i < begIdx + length; i++)
+				{
 					j = i % length;
-					if (!using[j]) {
+					if (!using[j])
+					{
 						using[j] = true;
 						client = clientList[j];
 						return j;
 					}
 				}
 			}
-			try {
+			try
+			{
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void work() {
+	public void work()
+	{
 		idx = getIdleClient();
 		int errorCode = 1;
 
-		try {
+		try
+		{
 			getMaxRunId();
-			if (!isLoggedIn()) {
+			if (!isLoggedIn())
+			{
 				login(usernameList[idx], passwordList[idx]);
 			}
 			submit();
@@ -358,11 +417,14 @@ public class CodeForcesSubmitter extends Submitter {
 			submission.setStatus("Running & Judging");
 			baseService.addOrModify(submission);
 			getResult(usernameList[idx]);
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
-			if (e.getMessage() != null && e.getMessage().startsWith("judge_exception:")){
+			if (e.getMessage() != null && e.getMessage().startsWith("judge_exception:"))
+			{
 				submission.setStatus(e.getMessage().substring(16));
-			} else {
+			} else
+			{
 				submission.setStatus("Judging Error " + errorCode);
 			}
 			baseService.addOrModify(submission);
@@ -370,13 +432,17 @@ public class CodeForcesSubmitter extends Submitter {
 	}
 
 	@Override
-	public void waitForUnfreeze() {
-		try {
+	public void waitForUnfreeze()
+	{
+		try
+		{
 			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			e.printStackTrace();
 		}
-		synchronized (using) {
+		synchronized (using)
+		{
 			using[idx] = false;
 		}
 	}

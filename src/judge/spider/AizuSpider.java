@@ -9,33 +9,39 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
+public class AizuSpider extends Spider
+{
 
-public class AizuSpider extends Spider {
-
-	public void crawl() throws Exception{
+	public void crawl() throws Exception
+	{
 
 		String html = "";
 		HttpClient httpClient = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=" + problem.getOriginProb());
 		getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
-		try {
+		try
+		{
 			int statusCode = httpClient.executeMethod(getMethod);
-			if(statusCode != HttpStatus.SC_OK) {
-				System.err.println("Method failed: "+getMethod.getStatusLine());
+			if (statusCode != HttpStatus.SC_OK)
+			{
+				System.err.println("Method failed: " + getMethod.getStatusLine());
 			}
 			html = Tools.getHtml(getMethod, null);
 			html = HtmlHandleUtil.transformUrlToAbs(html, getMethod.getURI().toString());
-		} catch(Exception e) {
+		} catch (Exception e)
+		{
 			getMethod.releaseConnection();
 			throw new Exception();
 		}
 
-		if (html.contains("Time Limit :  sec, Memory Limit :  KB")) {
+		if (html.contains("Time Limit :  sec, Memory Limit :  KB"))
+		{
 			throw new Exception();
 		}
 
 		problem.setTitle(Tools.regFind(html, "<h1 class=\"title\">([\\s\\S]*?)</h1>").trim());
-		if (problem.getTitle().isEmpty()){
+		if (problem.getTitle().isEmpty())
+		{
 			throw new Exception();
 		}
 

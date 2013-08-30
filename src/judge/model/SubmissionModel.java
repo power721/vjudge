@@ -17,7 +17,7 @@ public class SubmissionModel extends BaseModel<SubmissionModel>
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 	public int getIsOpen()
 	{
 		return get("C_ISOPEN");
@@ -201,5 +201,5 @@ public class SubmissionModel extends BaseModel<SubmissionModel>
 	{
 		set("C_REAL_RUNID", realRunId);
 	}
-	
+
 }

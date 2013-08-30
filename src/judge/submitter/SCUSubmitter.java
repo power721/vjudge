@@ -37,7 +37,8 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 
-public class SCUSubmitter extends Submitter {
+public class SCUSubmitter extends Submitter
+{
 
 	static final String OJ_NAME = "SCU";
 	static private DefaultHttpClient clientList[];
@@ -53,34 +54,42 @@ public class SCUSubmitter extends Submitter {
 	private HttpHost host = new HttpHost("cstest.scu.edu.cn");
 	private String html;
 
-	static {
+	static
+	{
 		List<String> uList = new ArrayList<String>(), pList = new ArrayList<String>();
-		try {
+		try
+		{
 			FileReader fr = new FileReader(ApplicationContainer.sc.getRealPath("WEB-INF/classes/accounts.conf"));
 			BufferedReader br = new BufferedReader(fr);
-			while (br.ready()) {
+			while (br.ready())
+			{
 				String info[] = br.readLine().split("\\s+");
-				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME)){
+				if (info.length >= 3 && info[0].equalsIgnoreCase(OJ_NAME))
+				{
 					uList.add(info[1]);
 					pList.add(info[2]);
 				}
 			}
 			br.close();
 			fr.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		usernameList = uList.toArray(new String[0]);
 		passwordList = pList.toArray(new String[0]);
 		using = new boolean[usernameList.length];
 		clientList = new DefaultHttpClient[usernameList.length];
-		//HttpHost proxy = new HttpHost("127.0.0.1", 8087);
-		for (int i = 0; i < clientList.length; i++){
+		// HttpHost proxy = new HttpHost("127.0.0.1", 8087);
+		for (int i = 0; i < clientList.length; i++)
+		{
 			clientList[i] = new DefaultHttpClient();
-			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
+			clientList[i].getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+					"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1");
 			clientList[i].getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
 			clientList[i].getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-			//clientList[i].getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+			// clientList[i].getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+			// proxy);
 		}
 
 		Map<String, String> languageList = new TreeMap<String, String>();
@@ -91,31 +100,38 @@ public class SCUSubmitter extends Submitter {
 		sc.setAttribute("SCU", languageList);
 	}
 
-	private void getMaxRunId() throws ClientProtocolException, IOException {
+	private void getMaxRunId() throws ClientProtocolException, IOException
+	{
 		Pattern p = Pattern.compile("<td height=\"44\">(\\d+)</td>");
 
-		try {
+		try
+		{
 			get = new HttpGet("/soj/solutions.action");
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 
 		Matcher m = p.matcher(html);
-		if (m.find()) {
+		if (m.find())
+		{
 			maxRunId = Integer.parseInt(m.group(1));
 			System.out.println("maxRunId : " + maxRunId);
-		} else {
+		} else
+		{
 			throw new RuntimeException();
 		}
 	}
 
-	private void submit(String username, String password) throws ClientProtocolException, IOException {
+	private void submit(String username, String password) throws ClientProtocolException, IOException
+	{
 		Problem problem = (Problem) baseService.query(Problem.class, submission.getProblem().getId());
-		
-		try {
+
+		try
+		{
 			post = new HttpPost("/soj/submit.action");
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("problemId", problem.getOriginProb()));
@@ -124,73 +140,80 @@ public class SCUSubmitter extends Submitter {
 			nvps.add(new BasicNameValuePair("password", password));
 			nvps.add(new BasicNameValuePair("language", submission.getLanguage()));
 			nvps.add(new BasicNameValuePair("source", submission.getSource()));
-			
+
 			post.setEntity(new UrlEncodedFormEntity(nvps, Charset.forName("GBK")));
-			
+
 			response = client.execute(host, post);
 			entity = response.getEntity();
-			
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
+
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY)
+			{
 				throw new RuntimeException();
 			}
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 	}
 
-	private String getCaptcha() throws ClientProtocolException, IOException {
+	private String getCaptcha() throws ClientProtocolException, IOException
+	{
 		File captchaPic = new File("scu_captcha_" + idx + ".jpg");
-		try {
+		try
+		{
 			get = new HttpGet("/soj/validation_code");
 			response = client.execute(host, get);
 			entity = response.getEntity();
-			
-			FileOutputStream fos = new FileOutputStream(captchaPic);
-		    entity.writeTo(fos);
-		    fos.close();
 
-		    BufferedImage img = ImageIO.read(captchaPic);
-		    return SCUCaptchaRecognizer.recognize(img);
-		} finally {
+			FileOutputStream fos = new FileOutputStream(captchaPic);
+			entity.writeTo(fos);
+			fos.close();
+
+			BufferedImage img = ImageIO.read(captchaPic);
+			return SCUCaptchaRecognizer.recognize(img);
+		} finally
+		{
 			EntityUtils.consume(entity);
-			if (captchaPic.exists()) {
+			if (captchaPic.exists())
+			{
 				captchaPic.delete();
 			}
 		}
 	}
 
-	public void getResult(String username) throws Exception{
-		Pattern p = Pattern.compile(
-			"<td height=\"44\">(\\d+)</td>\\s*" +
-			"<td>.*?</td>\\s*" +
-			"<td>.*?</td>\\s*" +
-			"<td>.*?</td>\\s*" +
-			"<td>[\\s\\S]*?</td>\\s*" +
-			"<td>([\\s\\S]*?)</td>\\s*" +
-			"<td>(\\d+)</td>\\s*" +
-			"<td>(\\d+)</td>");
+	public void getResult(String username) throws Exception
+	{
+		Pattern p = Pattern.compile("<td height=\"44\">(\\d+)</td>\\s*" + "<td>.*?</td>\\s*" + "<td>.*?</td>\\s*" + "<td>.*?</td>\\s*"
+				+ "<td>[\\s\\S]*?</td>\\s*" + "<td>([\\s\\S]*?)</td>\\s*" + "<td>(\\d+)</td>\\s*" + "<td>(\\d+)</td>");
 
 		long cur = new Date().getTime(), interval = 2000;
-		while (new Date().getTime() - cur < 600000){
-			try {
+		while (new Date().getTime() - cur < 600000)
+		{
+			try
+			{
 				get = new HttpGet("/soj/solutions.action?userId=" + username);
 				response = client.execute(host, get);
 				entity = response.getEntity();
 				html = EntityUtils.toString(entity);
-			} finally {
+			} finally
+			{
 				EntityUtils.consume(entity);
 			}
 
 			Matcher m = p.matcher(html);
-			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId) {
+			if (m.find() && Integer.parseInt(m.group(1)) > maxRunId)
+			{
 				String result = m.group(2).replace("<BR>", " ").replaceAll("<.*?>", "").trim();
 				submission.setStatus(result);
 				submission.setRealRunId(m.group(1));
-				if (!result.contains("ing")){
-					if (result.equals("Accepted")){
+				if (!result.contains("ing"))
+				{
+					if (result.equals("Accepted"))
+					{
 						submission.setTime(Integer.parseInt(m.group(3)));
 						submission.setMemory(Integer.parseInt(m.group(4)));
-					} else if (result.contains("Compilation")) {
+					} else if (result.contains("Compilation"))
+					{
 						getAdditionalInfo(submission.getRealRunId());
 					}
 					baseService.addOrModify(submission);
@@ -204,53 +227,66 @@ public class SCUSubmitter extends Submitter {
 		throw new Exception();
 	}
 
-	private void getAdditionalInfo(String runId) throws HttpException, IOException {
-		try {
+	private void getAdditionalInfo(String runId) throws HttpException, IOException
+	{
+		try
+		{
 			get = new HttpGet("/soj/judge_message.action?id=" + runId);
 			response = client.execute(host, get);
 			entity = response.getEntity();
 			html = EntityUtils.toString(entity);
-		} finally {
+		} finally
+		{
 			EntityUtils.consume(entity);
 		}
 		submission.setAdditionalInfo(Tools.regFind(html, "(<pre>[\\s\\S]*?</pre>)"));
 	}
 
-	private int getIdleClient() {
+	private int getIdleClient()
+	{
 		int length = usernameList.length;
 		int begIdx = (int) (Math.random() * length);
 
-		while(true) {
-			synchronized (using) {
-				for (int i = begIdx, j; i < begIdx + length; i++) {
+		while (true)
+		{
+			synchronized (using)
+			{
+				for (int i = begIdx, j; i < begIdx + length; i++)
+				{
 					j = i % length;
-					if (!using[j]) {
+					if (!using[j])
+					{
 						using[j] = true;
 						client = clientList[j];
 						return j;
 					}
 				}
 			}
-			try {
+			try
+			{
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void work() {
+	public void work()
+	{
 		idx = getIdleClient();
 		int errorCode = 1;
 
-		try {
+		try
+		{
 			getMaxRunId();
 			submit(usernameList[idx], passwordList[idx]);
 			errorCode = 2;
 			submission.setStatus("Running & Judging");
 			baseService.addOrModify(submission);
 			getResult(usernameList[idx]);
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 			submission.setStatus("Judging Error " + errorCode);
 			baseService.addOrModify(submission);
@@ -258,38 +294,49 @@ public class SCUSubmitter extends Submitter {
 	}
 
 	@Override
-	public void waitForUnfreeze() {
-		try {
+	public void waitForUnfreeze()
+	{
+		try
+		{
 			Thread.sleep(10000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e)
+		{
 			e.printStackTrace();
-		}	//SCU限制每两次提交之间至少隔3秒
-		synchronized (using) {
+		} // SCU限制每两次提交之间至少隔3秒
+		synchronized (using)
+		{
 			using[idx] = false;
 		}
 	}
 }
 
+class SCUCaptchaRecognizer
+{
 
-class SCUCaptchaRecognizer {
-	
-	public static String recognize(BufferedImage img) {
+	public static String recognize(BufferedImage img)
+	{
 		StringBuilder ans = new StringBuilder();
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++)
+		{
 			int minDiff = 999999;
 			char digitAns = 0;
-			for (int j = 0; j <= 9; j++) {
+			for (int j = 0; j <= 9; j++)
+			{
 				int curDiff = 0;
-				for (int y = 0; y < 9; y++) {
-					for (int x = 0; x < 6; x++) {
+				for (int y = 0; y < 9; y++)
+				{
+					for (int x = 0; x < 6; x++)
+					{
 						boolean pixel1 = digits[j][y].charAt(x) == '#';
 						boolean pixel2 = img.getRGB(left[i] + x, 1 + y) < -1e7;
-						if (pixel1 != pixel2) {
+						if (pixel1 != pixel2)
+						{
 							++curDiff;
 						}
 					}
 				}
-				if (curDiff < minDiff) {
+				if (curDiff < minDiff)
+				{
 					minDiff = curDiff;
 					digitAns = (char) ('0' + j);
 				}
@@ -298,119 +345,17 @@ class SCUCaptchaRecognizer {
 		}
 		return ans.toString();
 	}
-	
-	private static int left[] = new int[]{4, 12, 20, 28};
-	
-	private static String[][] digits = new String[][]{
-			{
-				"  ##  ",
-				" #  # ",
-				"#    #",
-				"#    #",
-				"#    #",
-				"#    #",
-				"#    #",
-				" #  # ",
-				"  ##  "
-			},
-			{
-			    "  ##  ",
-			    " # #  ",
-			    "   #  ",
-			    "   #  ",
-			    "   #  ",
-			    "   #  ",
-			    "   #  ",
-			    "   #  ",
-			    " #####"
-			},
-			{
-			    "####  ",
-			    "    # ",
-			    "    # ",
-			    "    # ",
-			    "   #  ",
-			    "  #   ",
-			    " #    ",
-			    "#     ",
-			    "##### "
-			},
-			{
-			    "####  ",
-			    "    # ",
-			    "    # ",
-			    "   #  ",
-			    " ##   ",
-			    "   #  ",
-			    "    # ",
-			    "    # ",
-			    "####  "
-			},
-			{
-				"    # ",
-				"   ## ",
-				"  # # ",
-				" #  # ",
-				"#   # ",
-				"######",
-				"    # ",
-				"    # ",
-				"    # "
-			},
-			{
-			    "##### ",
-			    "#     ",
-			    "#     ",
-			    "###   ",
-			    "   #  ",
-			    "    # ",
-			    "    # ",
-			    "   #  ",
-			    "###   "
-			},
-			{
-				"  ####",
-				" #    ",
-				"#     ",
-				"# ##  ",
-				"##  # ",
-				"#    #",
-				"#    #",
-				" #  # ",
-				"  ##  "		
-			},
-			{
-				"######",
-				"     #",
-				"    # ",
-				"   #  ",
-				"   #  ",
-				"  #   ",
-				"  #   ",
-				" #    ",
-				" #    "
-			},
-			{
-				" #### ",
-				"#    #",
-				"#    #",
-				" #  # ",
-				" #### ",
-				"#    #",
-				"#    #",
-				"#    #",
-				" #### "   
-			},
-			{
-			    "  ##  ",
-			    " #  # ",
-			    "#    #",
-			    "#    #",
-			    " #  ##",
-			    "  ## #",
-			    "     #",
-			    "    # ",
-			    "####  "
-			}
-		};
+
+	private static int left[] = new int[] { 4, 12, 20, 28 };
+
+	private static String[][] digits = new String[][] { { "  ##  ", " #  # ", "#    #", "#    #", "#    #", "#    #", "#    #", " #  # ", "  ##  " },
+			{ "  ##  ", " # #  ", "   #  ", "   #  ", "   #  ", "   #  ", "   #  ", "   #  ", " #####" },
+			{ "####  ", "    # ", "    # ", "    # ", "   #  ", "  #   ", " #    ", "#     ", "##### " },
+			{ "####  ", "    # ", "    # ", "   #  ", " ##   ", "   #  ", "    # ", "    # ", "####  " },
+			{ "    # ", "   ## ", "  # # ", " #  # ", "#   # ", "######", "    # ", "    # ", "    # " },
+			{ "##### ", "#     ", "#     ", "###   ", "   #  ", "    # ", "    # ", "   #  ", "###   " },
+			{ "  ####", " #    ", "#     ", "# ##  ", "##  # ", "#    #", "#    #", " #  # ", "  ##  " },
+			{ "######", "     #", "    # ", "   #  ", "   #  ", "  #   ", "  #   ", " #    ", " #    " },
+			{ " #### ", "#    #", "#    #", " #  # ", " #### ", "#    #", "#    #", "#    #", " #### " },
+			{ "  ##  ", " #  # ", "#    #", "#    #", " #  ##", "  ## #", "     #", "    # ", "####  " } };
 }

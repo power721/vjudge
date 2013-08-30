@@ -33,7 +33,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 	public boolean deleteModel()
 	{
 		List<DescriptionModel> descriptions = DescriptionModel.dao.find("SELECT * FROM t_description WHERE C_PROBLEM_ID=?", getId());
-		if(descriptions != null)
+		if (descriptions != null)
 		{
 			Iterator<DescriptionModel> iterator = descriptions.iterator();
 			DescriptionModel description;
