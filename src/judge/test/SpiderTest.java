@@ -24,7 +24,7 @@ public class SpiderTest extends BaseController
 			pageNumber = Integer.parseInt(getCookie("pageNumber", "1"));
 		int pageSize = getParaToInt("s", 20);
 
-		Page<ProblemModel> problemList = ProblemModel.dao.paginate(pageNumber, pageSize, "SELECT *", "FROM t_problem");
+		Page<ProblemModel> problemList = ProblemModel.dao.paginate(pageNumber, pageSize, "SELECT *", "FROM t_problem ORDER BY C_TRIGGER_TIME DESC,C_ID DESC");
 		setAttr("problemList", problemList);
 
 		render("spider_result.html");
@@ -153,7 +153,8 @@ public class SpiderTest extends BaseController
 
 	public void uva()
 	{
-		run("UVA", "10000", new UVASpider());
+		run("UVA", "1086", new UVASpider());
+		run("UVA", "10660", new UVASpider());
 	}
 
 	public void zoj()
@@ -224,5 +225,6 @@ public class SpiderTest extends BaseController
 		spider.start();
 
 		getLog().info("Sipder crawling " + OJ + "-" + pid + "……");
+		renderText("Sipder crawling " + OJ + "-" + pid + "……");
 	}
 }

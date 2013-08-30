@@ -21,7 +21,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 				getOriginProb());
 		if (problemModel == null)
 		{
-			getLog().info("Insert new problem: " + getOriginOJ() + "-" + getOriginProb());
+			getLog().debug("Insert new problem: " + getOriginOJ() + "-" + getOriginProb());
 			return save();
 		}
 
@@ -45,7 +45,7 @@ public class ProblemModel extends BaseModel<ProblemModel>
 		}
 		// TODO delete cproblems and submissions
 
-		getLog().info("Delete problem: " + getOriginOJ() + "-" + getOriginProb());
+		getLog().debug("Delete problem: " + getOriginOJ() + "-" + getOriginProb());
 		return delete();
 	}
 

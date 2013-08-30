@@ -23,11 +23,12 @@ public class DescriptionModel extends BaseModel<DescriptionModel>
 				get("C_PROBLEM_ID"), getAuthor());
 		if (descriptionModel == null)
 		{
-			getLog().info("Insert new problem description: " + get("C_PROBLEM_ID") + "-" + getAuthor());
+			getLog().debug("Insert new problem description: " + get("C_PROBLEM_ID") + "-" + getAuthor());
 			return save();
 		}
 
 		setId(descriptionModel.getId());
+		getLog().debug("Update problem description(" + getId() + "): " + get("C_PROBLEM_ID") + "-" + getAuthor());
 		return update();
 	}
 
