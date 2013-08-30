@@ -2,14 +2,34 @@ package judge.test;
 
 import java.util.Date;
 
-import com.jfinal.plugin.activerecord.Page;
-
 import judge.action.BaseController;
+import judge.core.JudgeConstants;
 import judge.model.DescriptionModel;
 import judge.model.ProblemModel;
 import judge.service.BaseService;
 import judge.service.IBaseService;
-import judge.spider.*;
+import judge.spider.AizuSpider;
+import judge.spider.CSUSpider;
+import judge.spider.CodeForcesSpider;
+import judge.spider.FZUSpider;
+import judge.spider.HDUSpider;
+import judge.spider.HUSTSpider;
+import judge.spider.HYSBZSpider;
+import judge.spider.LightOJSpider;
+import judge.spider.NBUTSpider;
+import judge.spider.POJSpider;
+import judge.spider.SCUSpider;
+import judge.spider.SGUSpider;
+import judge.spider.SPOJSpider;
+import judge.spider.Spider;
+import judge.spider.UESTCSpider;
+import judge.spider.URALSpider;
+import judge.spider.UVALiveSpider;
+import judge.spider.UVASpider;
+import judge.spider.ZOJSpider;
+import judge.spider.ZTreningSpider;
+
+import com.jfinal.plugin.activerecord.Page;
 
 public class SpiderTest extends BaseController
 {
@@ -182,6 +202,7 @@ public class SpiderTest extends BaseController
 			l = r;
 			r = tmp;
 		}
+		getLog().debug("Crawl problem from " + pid1 + "to" + pid2);
 		for (Integer a = l; a <= r; ++a)
 		{
 			try
@@ -222,7 +243,8 @@ public class SpiderTest extends BaseController
 
 		spider.setProblem(problem);
 		spider.setDescription(description);
-		spider.start();
+		JudgeConstants.threadPool.execute(spider);
+		// spider.start();
 
 		getLog().info("Sipder crawling " + OJ + "-" + pid + "……");
 		renderText("Sipder crawling " + OJ + "-" + pid + "……");

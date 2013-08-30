@@ -1,4 +1,4 @@
-package judge.config;
+package judge.core;
 
 import judge.action.MainController;
 import judge.model.*;
