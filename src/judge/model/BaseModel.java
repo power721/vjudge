@@ -2,6 +2,8 @@ package judge.model;
 
 import com.jfinal.log.Logger;
 import com.jfinal.plugin.activerecord.Model;
+import com.jfinal.plugin.activerecord.TableInfo;
+import com.jfinal.plugin.activerecord.TableInfoMapping;
 
 public abstract class BaseModel<M extends BaseModel<?>> extends Model<M>
 {
@@ -14,6 +16,21 @@ public abstract class BaseModel<M extends BaseModel<?>> extends Model<M>
 	public boolean deleteModel()
 	{
 		return delete();
+	}
+	
+	public String getPrimaryKey()
+	{
+		return getTableInfo().getPrimaryKey();
+	}
+	
+	public String getTableName()
+	{
+		return getTableInfo().getTableName();
+	}
+	
+	public TableInfo getTableInfo()
+	{
+		return TableInfoMapping.me().getTableInfo(getClass());
 	}
 
 	public Logger getLog()

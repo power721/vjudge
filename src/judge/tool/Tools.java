@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
+
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
@@ -25,6 +27,7 @@ import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.io.IOUtils;
 
 import com.Ostermiller.util.CSVParser;
+import com.jfinal.kit.StringKit;
 
 /**
  * 公用工具类
@@ -54,19 +57,24 @@ public class Tools
 			if (c == '&')
 			{
 				sb.append("&#38;");
-			} else if (c == '"')
+			}
+			else if (c == '"')
 			{
 				sb.append("&#34;");
-			} else if (c == '\'')
+			}
+			else if (c == '\'')
 			{
 				sb.append("&#39;");
-			} else if (c == '<')
+			}
+			else if (c == '<')
 			{
 				sb.append("&lt;");
-			} else if (c == '>')
+			}
+			else if (c == '>')
 			{
 				sb.append("&gt;");
-			} else
+			}
+			else
 			{
 				sb.append(c);
 			}
@@ -285,7 +293,8 @@ public class Tools
 			if (c[i] == '\u3000')
 			{
 				c[i] = ' ';
-			} else if (c[i] > '\uFF00' && c[i] < '\uFF5F')
+			}
+			else if (c[i] > '\uFF00' && c[i] < '\uFF5F')
 			{
 				c[i] = (char) (c[i] - 65248);
 			}
@@ -323,46 +332,78 @@ public class Tools
 		if (srcLang.contains("c++") || srcLang.contains("cpp") || srcLang.contains("g++"))
 		{
 			return "sh-cpp";
-		} else if (srcLang.contains(" c ") || srcLang.contains("gcc"))
-		{
-			return "sh-c";
-		} else if (srcLang.contains("c#"))
-		{
-			return "sh-csharp";
-		} else if (srcLang.contains("java "))
-		{
-			return "sh-java";
-		} else if (srcLang.contains("pascal") || srcLang.contains("fpc"))
-		{
-			return "sh-pascal";
-		} else if (srcLang.contains("tcl"))
-		{
-			return "sh-tcl";
-		} else if (srcLang.contains("scala"))
-		{
-			return "sh-scala";
-		} else if (srcLang.contains("perl"))
-		{
-			return "sh-perl";
-		} else if (srcLang.contains("python"))
-		{
-			return "sh-python";
-		} else if (srcLang.contains("ruby"))
-		{
-			return "sh-ruby";
-		} else if (srcLang.contains("php"))
-		{
-			return "sh-php";
-		} else if (srcLang.contains("prolog"))
-		{
-			return "sh-prolog";
-		} else if (srcLang.contains("javascript"))
-		{
-			return "sh-javascript";
-		} else
+		}
+		else if (srcLang.contains(" c ") || srcLang.contains("gcc"))
 		{
 			return "sh-c";
 		}
+		else if (srcLang.contains("c#"))
+		{
+			return "sh-csharp";
+		}
+		else if (srcLang.contains("java "))
+		{
+			return "sh-java";
+		}
+		else if (srcLang.contains("pascal") || srcLang.contains("fpc"))
+		{
+			return "sh-pascal";
+		}
+		else if (srcLang.contains("tcl"))
+		{
+			return "sh-tcl";
+		}
+		else if (srcLang.contains("scala"))
+		{
+			return "sh-scala";
+		}
+		else if (srcLang.contains("perl"))
+		{
+			return "sh-perl";
+		}
+		else if (srcLang.contains("python"))
+		{
+			return "sh-python";
+		}
+		else if (srcLang.contains("ruby"))
+		{
+			return "sh-ruby";
+		}
+		else if (srcLang.contains("php"))
+		{
+			return "sh-php";
+		}
+		else if (srcLang.contains("prolog"))
+		{
+			return "sh-prolog";
+		}
+		else if (srcLang.contains("javascript"))
+		{
+			return "sh-javascript";
+		}
+		else
+		{
+			return "sh-c";
+		}
+	}
+
+	/**
+	 * 获取真实IP地址
+	 * 
+	 * @return
+	 */
+	public static String getRemoteAddr(HttpServletRequest request)
+	{
+		if (StringKit.notBlank(request.getHeader("X-Real-IP")))
+		{
+			return request.getHeader("X-Real-IP");
+		}
+		else if (StringKit.notBlank(request.getHeader("x-forwarded-for")))
+		{
+			return request.getHeader("x-forwarded-for");
+		}
+
+		return request.getRemoteAddr();
 	}
 
 }
