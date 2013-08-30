@@ -1,8 +1,7 @@
 package judge.config;
 
 import judge.action.MainController;
-import judge.model.DescriptionModel;
-import judge.model.ProblemModel;
+import judge.model.*;
 import judge.test.SpiderTest;
 import judge.tool.ApplicationContainer;
 
@@ -48,10 +47,13 @@ public class JudgeConfig extends JFinalConfig
 		// 配置ActiveRecord插件
 		ActiveRecordPlugin arp = new ActiveRecordPlugin(c3p0Plugin);
 		arp.setShowSql(true);
-		// arp.addMapping("user", "uid", UserModel.class); // 映射user表到 User模型
-		arp.addMapping("t_problem", "C_ID", ProblemModel.class);
+		arp.addMapping("t_user",  "C_ID", UserModel.class); // 映射t_user表到 UserModel模型
+		arp.addMapping("t_problem","C_ID", ProblemModel.class);
+		arp.addMapping("t_contest", "C_ID", ContestModel.class);
+		arp.addMapping("t_cproblem", "C_ID", CproblemModel.class);
+		arp.addMapping("t_submission", "C_ID", SubmissionModel.class);
 		arp.addMapping("t_description", "C_ID", DescriptionModel.class);
-		// arp.addMapping("contest", "cid", ContestModel.class);
+		arp.addMapping("t_replay_status", "C_ID", ReplayStatusModel.class);
 		me.add(arp);
 	}
 
