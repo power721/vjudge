@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="WebRoot"/>
+	<classpathentry excluding="assets/js/html5shiv.js|assets/js/jqBootstrapValidation.js|assets/js/jquery-1.9.1.min.js|assets/js/placeholder.js" kind="src" path="WebRoot"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.WebProject">
 		<attributes>
